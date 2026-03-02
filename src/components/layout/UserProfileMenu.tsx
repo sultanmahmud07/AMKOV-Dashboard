@@ -2,7 +2,7 @@ import { IUser } from "@/types";
 import React, { useEffect, useRef, useState } from "react";
 import { FiLogOut, FiUser, FiMap, FiBriefcase, FiSettings, FiLayers, FiUsers } from "react-icons/fi";
 import { Link, useNavigate } from "react-router";
-import defaultUserPic from '../../assets/images/default/default-user.jpg';
+import defaultUserPic from '../../assets/images/default/default-user.png';
 import { authApi, useLogoutMutation } from "@/redux/features/auth/auth.api";
 import { useAppDispatch } from "@/redux/hook";
 import { Box, ChartNoAxesCombined } from "lucide-react";

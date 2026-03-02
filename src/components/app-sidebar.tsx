@@ -33,7 +33,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             alt="DropX Logo"
             width={200}
             height={100}
-            className="w-40 block dark:hidden"
+            className="w-48 block dark:hidden"
           />
 
           {/* Logo for Dark Mode (Hidden in Light Mode) */}
@@ -42,7 +42,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             alt="DropX Logo"
             width={200}
             height={100}
-            className="w-40 hidden dark:block"
+            className="w-48 hidden invert brightness-0 dark:block"
           />
         </Link>
       </SidebarHeader>
