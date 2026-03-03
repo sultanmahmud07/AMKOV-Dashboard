@@ -11,6 +11,7 @@ import Unauthorized from "@/pages/Unauthorized";
 import { TRole } from "@/types";
 import { withAuth } from "@/utils/withAuth";
 import { role } from "@/constants/role";
+import BlogDetails from "@/components/modules/Blogs/BlogDetails";
 
 export const router = createBrowserRouter([
   {
@@ -29,6 +30,14 @@ export const router = createBrowserRouter([
       {
         Component: Register,
         path: "/register",
+      },
+      {
+        path: "/news/edit/:slug",
+        Component: UserDetails,
+      },
+      {
+        path: "/news/view/:slug",
+        Component: BlogDetails,
       },
       {
         path: "/user/:id",

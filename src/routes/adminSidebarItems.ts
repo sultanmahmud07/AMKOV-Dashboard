@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import MyProfile from "@/pages/Sender/MyProfile";
 import AllContactList from "@/components/modules/Admin/Contact/ContactList";
+import Blogs from "@/components/modules/Blogs/Blogs";
+import AddBlog from "@/components/modules/Blogs/AddBlog";
 
 const Analytics = lazy(() => import("@/pages/Admin/Analytics"));
 
@@ -80,6 +82,23 @@ export const adminSidebarItems: ISidebarItem[] = [
         url: "/user/unverified",
         component: AllUnauthorUserList,
         icon: UserCheck,
+      },
+    ],
+  },
+  {
+    title: "Content Management",
+    items: [
+      {
+        title: "All News",
+        url: "/news",
+        component: Blogs,
+        icon: BarChart3,
+      },
+      {
+        title: "Add News",
+        url: "/news/create",
+        component: AddBlog,
+        icon: Users,
       },
     ],
   },

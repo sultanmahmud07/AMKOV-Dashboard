@@ -40,15 +40,11 @@ export function LoginForm({
 
       if (res.success) {
         toast.success("Logged in successfully");
-        if (res.data.user.role === "SENDER") {
-          navigate("/sender/overview");
-        } else if (res.data.user.role === "RECEIVER") {
-          navigate("/receiver/overview");
-        } else if (
+        if (
           res.data.user.role === "SUPER_ADMIN" ||
           res.data.user.role === "ADMIN"
         ) {
-          navigate("/admin/analytics");
+          navigate("/analytics");
         } else {
           navigate("/");
         }
