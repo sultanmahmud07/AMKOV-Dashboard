@@ -1,20 +1,14 @@
 import UserAnalytics from "@/components/modules/Admin/Analytics/UserAnalytics";
-import RequestedParcelList from "@/components/modules/Admin/Parcel/RequestedParcelList";
 import AllAdminList from "@/components/modules/Admin/User/AllAdmins";
 import DeletedUserList from "@/components/modules/Admin/User/DeletedUser";
-import AllUnauthorUserList from "@/components/modules/Admin/User/UnauthorUser";
 import AllUserList from "@/components/modules/Admin/User/UserList";
-import Parcels from "@/pages/Admin/Parcels";
 import { ISidebarItem } from "@/types";
-import { lazy } from "react";
 import {
   BarChart3,
   Package,
-  // PlusSquare,
-  ClipboardList,
+  PlusSquare,
   Users,
   UserX,
-  UserCheck,
   Shield,
   User,
   Contact,
@@ -23,12 +17,15 @@ import MyProfile from "@/pages/Sender/MyProfile";
 import AllContactList from "@/components/modules/Admin/Contact/ContactList";
 import Blogs from "@/components/modules/Blogs/Blogs";
 import AddBlog from "@/components/modules/Blogs/AddBlog";
+import Analytics from "@/pages/Analytics/Analytics";
+import Products from "@/pages/Product/Products";
+import AddProduct from "@/pages/Product/AddProduct";
+import AllCategories from "@/pages/Category/AllCategories";
 
-const Analytics = lazy(() => import("@/pages/Admin/Analytics"));
 
 export const adminSidebarItems: ISidebarItem[] = [
   {
-    title: "Parcel Management",
+    title: "Product Management",
     items: [
       {
         title: "Analytics",
@@ -37,23 +34,23 @@ export const adminSidebarItems: ISidebarItem[] = [
         icon: BarChart3,
       },
       {
-        title: "All Parcels",
-        url: "/parcels",
-        component: Parcels,
+        title: "All Products",
+        url: "/products",
+        component: Products,
         icon: Package,
       },
       {
-        title: "Requested",
-        url: "/parcel/requested",
-        component: RequestedParcelList,
-        icon: ClipboardList,
+        title: "Add Product",
+        url: "/product/create",
+        component: AddProduct,
+        icon: PlusSquare,
       },
-      // {
-      //   title: "Add Parcel",
-      //   url: "/parcel/create",
-      //   component: Parcels,
-      //   icon: PlusSquare,
-      // },
+      {
+        title: "All Categories",
+        url: "/categories",
+        component: AllCategories,
+        icon: Package,
+      },
     ],
   },
   {
@@ -76,13 +73,7 @@ export const adminSidebarItems: ISidebarItem[] = [
         url: "/user/deleted",
         component: DeletedUserList,
         icon: UserX,
-      },
-      {
-        title: "Unverified User",
-        url: "/user/unverified",
-        component: AllUnauthorUserList,
-        icon: UserCheck,
-      },
+      }
     ],
   },
   {

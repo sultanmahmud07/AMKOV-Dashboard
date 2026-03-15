@@ -1,26 +1,31 @@
-import loginImg from "@/assets/images/login-img-2.jpg";
 import { LoginForm } from "@/components/modules/Authentication/LoginForm";
-
+import logoDark from "../assets/images/logo/logo-dark.png";
 export default function Login() {
   return (
-    <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2 xl:min-h-[800px] mt-20">
-      {/* Left Side: Form */}
-      <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-background">
-        <div className="mx-auto grid w-full max-w-[450px] gap-6">
-          <LoginForm />
-        </div>
+    <div className="relative flex min-h-screen w-full flex-col items-center justify-center bg-gradient-to-b from-[#A5D6F7] via-[#D0EBFB] to-white p-4 overflow-hidden">
+      
+      {/* Top Left Logo (Ebolt) */}
+      <div className="absolute top-6 left-6 flex items-center gap-2 font-bold text-gray-900 text-xl">
+        <img
+            src={logoDark}
+            alt="DropX Logo"
+            width={200}
+            height={100}
+            className="w-32"
+          />
       </div>
 
-      {/* Right Side: Image */}
-      <div className="hidden bg-muted lg:block relative overflow-hidden">
-        <img
-          src={loginImg}
-          alt="Login Visual"
-          className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
-        />
-        {/* Optional: Dark Overlay for better contrast if you add text later */}
-        <div className="absolute inset-0 bg-black/10"></div>
+      {/* Decorative background circles (optional, to mimic the faint lines in the image) */}
+      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+        <div className="h-[600px] w-[600px] rounded-full border border-white/20"></div>
+        <div className="absolute h-[800px] w-[800px] rounded-full border border-white/20"></div>
       </div>
+
+      {/* Centered Form Container */}
+      <div className="relative z-10 w-full max-w-[420px]">
+        <LoginForm />
+      </div>
+      
     </div>
   );
 }

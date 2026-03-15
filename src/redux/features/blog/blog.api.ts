@@ -34,7 +34,7 @@ export const blogApi = baseApi.injectEndpoints({
             }),
             getAllBlogs: builder.query({
                   query: (params) => ({
-                        url: "/news/all-news",
+                        url: "/news/retrieve/all",
                         method: "GET",
                         params: params,
                   }),

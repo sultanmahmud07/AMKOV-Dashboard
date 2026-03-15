@@ -11,8 +11,8 @@ export function ModeToggle() {
     <div
       onClick={() => setTheme(isDark ? "light" : "dark")}
       className={`
-        relative w-16 h-8 flex items-center cursor-pointer rounded-full p-1 transition-colors duration-500 shadow-inner
-        ${isDark ? 'bg-slate-800 border border-slate-700' : 'bg-slate-200 border border-slate-300'}
+        relative w-[4.6rem] h-10 flex items-center cursor-pointer rounded-full p-1 transition-colors duration-500 shadow-inner
+        ${isDark ? 'bg-secondary/60 border border-slate-700' : 'bg-secondary/10 border border-slate-300'}
       `}
     >
       <span className="sr-only">Toggle theme</span>
@@ -20,7 +20,7 @@ export function ModeToggle() {
       {/* The Sliding Thumb */}
       <div
         className={`
-          bg-white w-6 h-6 rounded-full shadow-md transform transition-transform duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] flex items-center justify-center relative overflow-hidden
+          bg-white w-8 h-8 rounded-full shadow-md transform transition-transform duration-500 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] flex items-center justify-center relative overflow-hidden
           ${isDark ? 'translate-x-8' : 'translate-x-0'}
         `}
       >

@@ -3,7 +3,6 @@ import { generateRoutes } from "@/utils/generateRoutes";
 import { createBrowserRouter } from "react-router";
 import { adminSidebarItems } from "./adminSidebarItems";
 import UserDetails from "@/components/modules/Admin/User/UserDetails";
-import Analytics from "@/pages/Admin/Analytics";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import Verify from "@/pages/Verify";
@@ -12,6 +11,8 @@ import { TRole } from "@/types";
 import { withAuth } from "@/utils/withAuth";
 import { role } from "@/constants/role";
 import BlogDetails from "@/components/modules/Blogs/BlogDetails";
+import Analytics from "@/pages/Analytics/Analytics";
+import EditBlog from "@/components/modules/Blogs/EditBlog/EditBlog";
 
 export const router = createBrowserRouter([
   {
@@ -23,21 +24,17 @@ export const router = createBrowserRouter([
         index: true,
       },
       ...generateRoutes(adminSidebarItems),
-      // {
-      //   Component: Login,
-      //   path: "/login",
-      // },
       {
         Component: Register,
         path: "/register",
       },
       {
-        path: "/news/edit/:slug",
-        Component: UserDetails,
-      },
-      {
         path: "/news/view/:slug",
         Component: BlogDetails,
+      },
+      {
+        path: "/news/edit/:slug",
+        Component: EditBlog,
       },
       {
         path: "/user/:id",

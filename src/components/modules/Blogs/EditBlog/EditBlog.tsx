@@ -241,11 +241,11 @@ const EditBlog: React.FC = () => {
         </div>
       </div>
 
-      <UpdateTextEditor
+      {/* <UpdateTextEditor
         formData={formData}
         setFormData={setFormData}
         previousContent={(preBlogData as any)?.data?.content}
-      />
+      /> */}
 
       <div className="flex items-center gap-4 mt-6">
         <Link

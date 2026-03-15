@@ -5,7 +5,6 @@ import axios from "axios";
 import { Link, useNavigate } from "react-router";
 import BASEURL from "@/utils/Constants";
 import WaitingLoader from "../loader/WaitingLoder";
-import TextEditor from "./TextEditor";
 
 type FormDataType = {
   title: string;
@@ -307,10 +306,10 @@ const AddBlog = () => {
       </div>
 
       {/* Text Editor */}
-      <TextEditor
+      {/* <TextEditor
         formData={formData}
         setFormData={setFormData}
-      />
+      /> */}
 
       {/* Buttons */}
       <div className="flex items-center gap-4 mt-6">
