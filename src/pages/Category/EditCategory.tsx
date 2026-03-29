@@ -1,9 +1,8 @@
+import UpdateCategoryComponent from "@/components/modules/Category/UpdateCategory"
 
 const EditCategory = () => {
   return (
-    <div>
-      Edit Category
-    </div>
+    <UpdateCategoryComponent />
   )
 }
 

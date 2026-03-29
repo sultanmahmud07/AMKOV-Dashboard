@@ -15,6 +15,9 @@ import Analytics from "@/pages/Analytics/Analytics";
 import EditBlog from "@/components/modules/Blogs/EditBlog/EditBlog";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
+import CategoryDetailPage from "@/pages/Category/CategoryDetails";
+import EditCategory from "@/pages/Category/EditCategory";
+import AddCategory from "@/pages/Category/AddCategory";
 
 export const router = createBrowserRouter([
   {
@@ -37,6 +40,18 @@ export const router = createBrowserRouter([
       {
         path: "/news/edit/:slug",
         Component: EditBlog,
+      },
+      {
+        path: "/category/create",
+        Component: AddCategory,
+      },
+      {
+        path: "/category/view/:slug",
+        Component: CategoryDetailPage,
+      },
+      {
+        path: "/category/edit/:slug",
+        Component: EditCategory,
       },
       {
         path: "/user/:id",

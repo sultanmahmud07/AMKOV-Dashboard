@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from "react";
-import SearchBar from "@/components/shared/SearchBar/SearchBar";
 import { Link } from "react-router";
 import BlogCard from "./BlogCard";
 import Pagination from "@/components/shared/Pagination/Pagination";
@@ -8,18 +7,13 @@ import { IBlog } from "@/types/blog.type";
 import { useGetAllBlogsQuery } from "@/redux/features/blog/blog.api";
 import Loader from "@/pages/Spinner";
 
-/* =========== TYPES =========== */
-
-
-
-
 /* ================= COMPONENT ================= */
 
 const Blogs: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(10);
-  const [searchTerm, setSearchTerm] = useState("")
-  const [sortOrder, setSortOrder] = useState("")
+  const [searchTerm] = useState("")
+  const [sortOrder] = useState("")
   const { data, isLoading } = useGetAllBlogsQuery({ page: currentPage, limit, searchTerm, sort: sortOrder });
 
 

@@ -1,9 +1,8 @@
+import CategoryList from "@/components/modules/Category/CategoryList"
 
 const AllCategories = () => {
   return (
-    <div>
-      All Categories
-    </div>
+    <CategoryList />
   )
 }
 

@@ -1,10 +1,9 @@
+import CategoryDetails from '@/components/modules/Category/CategoryDetails';
 
-const CategoryDetails = () => {
+const CategoryDetailPage = () => {
   return (
-    <div>
-      Category Details
-    </div>
+    <CategoryDetails />
   )
 }
 
-export default CategoryDetails
+export default CategoryDetailPage;

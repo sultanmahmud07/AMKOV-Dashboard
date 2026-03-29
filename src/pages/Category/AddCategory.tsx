@@ -1,10 +1,9 @@
+import CreateCategory from '@/components/modules/Category/CreateCategory'
 
 const AddCategory = () => {
-  return (
-    <div>
-      Category
-    </div>
-  )
+      return (
+            <CreateCategory />
+      )
 }
 
 export default AddCategory
