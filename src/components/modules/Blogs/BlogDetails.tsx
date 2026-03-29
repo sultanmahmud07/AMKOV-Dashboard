@@ -1,38 +1,20 @@
 
 import { FaArrowLeftLong } from "react-icons/fa6";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import BASEURL from "@/utils/Constants";
 import { Link, useParams } from "react-router";
 import Loader from "@/pages/Spinner";
+import { Button } from "@/components/ui/button";
+import { useGetBlogDetailsQuery } from "@/redux/features/blog/blog.api";
 
 const BlogDetails = () => {
   const { slug } = useParams();
+  const { data, isLoading } = useGetBlogDetailsQuery(slug);
 
-  // Fetch blog data
-  const {
-    data: preBlogData = {},
-    isLoading: blogLoading,
-  } = useQuery({
-    queryKey: ["blog", slug],
-    queryFn: async () => {
-      const response = await axios.get(`${BASEURL}/news/retrieve/slug/${slug}`, {
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: localStorage.getItem("token"),
-        },
-      });
-      return response.data;
-    },
-  });
 
-  if (blogLoading) return <Loader />;
-
-  const blog = preBlogData?.data || {};
+  if (isLoading) return <Loader />;
+  const blog = data?.data || {};
 
   return (
-    <div className="p-4 shadow-md rounded-md bg-white">
+    <div className="p-4 shadow-md rounded-md">
       {/* Header */}
       <div className="top flex items-center justify-between mb-6">
         <Link to="/news">
@@ -43,18 +25,18 @@ const BlogDetails = () => {
 
         <Link
           to={`/news/edit/${blog?._id}`}
-          className="text-white py-3 px-10 font-bold rounded-lg"
-          style={{
-            background: "linear-gradient(to bottom, #1BAE70, #1BAE70)",
-          }}
+          // className="text-white py-3 px-10 bg-primary font-bold rounded-lg"
+        
         >
+          <Button variant="outline">
           Edit News
+          </Button>
         </Link>
       </div>
 
       {/* Thumbnail */}
       <img
-        src={blog?.thambnail || "/default-img.png"}
+        src={blog?.thumbnail || "/default-img.png"}
         alt={blog?.title || "Blog"}
         className="w-full rounded-md"
       />
@@ -64,12 +46,12 @@ const BlogDetails = () => {
 
       {/* Meta Description */}
       {blog?.metaDescription && (
-        <p className="text-gray-600 mb-4">{blog.metaDescription}</p>
+        <p className=" mb-4">{blog.metaDescription}</p>
       )}
 
       {/* Blog Content */}
       <div
-        className="content text-gray-800"
+        className="content"
         dangerouslySetInnerHTML={{ __html: blog?.content || "" }}
       ></div>
 
@@ -79,7 +61,7 @@ const BlogDetails = () => {
           <strong>Tags:</strong>{" "}
           {blog?.tags?.length ? (
             blog.tags.map((tag: string, i:number) => (
-              <span key={i} className="mr-2 text-[#1BAE70]">
+              <span key={i} className="mr-2 text-primary">
                 #{tag}
               </span>
             ))

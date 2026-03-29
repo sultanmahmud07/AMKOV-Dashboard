@@ -3,10 +3,10 @@
 import { useState, useEffect, ChangeEvent } from "react";
 import { toast } from "react-toastify";
 import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router";
 import BASEURL from "@/utils/Constants";
 import WaitingLoader from "../../loader/WaitingLoder";
+import { useGetBlogDetailsQuery } from "@/redux/features/blog/blog.api";
 
 type FormDataType = {
   title: string;
@@ -37,11 +37,13 @@ const EditBlog: React.FC = () => {
     image: null,
   });
 
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [isLoader, setIsLoader] = useState<boolean>(false);
   // const [tagInput, setTagInput] = useState<string>("");
 
   const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
+
+    const { data, isLoading } = useGetBlogDetailsQuery(slug);
 
   /* ================= SLUG AUTO GENERATION ================= */
   useEffect(() => {
@@ -103,7 +105,7 @@ const EditBlog: React.FC = () => {
   /* ================= UPDATE BLOG ================= */
 
   const handleBlogUpdate = async (): Promise<void> => {
-    setIsLoading(true);
+    setIsLoader(true);
     try {
       const token = localStorage.getItem("token");
 
@@ -122,7 +124,7 @@ const EditBlog: React.FC = () => {
       bodyFormData.append("tags", JSON.stringify(formData.tags));
 
       const response = await axios.patch(
-        `${BASEURL}/news/update/${(preBlogData as any)?.data?._id}`,
+        `${BASEURL}/news/update/${(data as any)?.data?._id}`,
         bodyFormData,
         {
           headers: {
@@ -144,36 +146,16 @@ const EditBlog: React.FC = () => {
         error.response?.data?.error || "Something went wrong!"
       );
     } finally {
-      setIsLoading(false);
+      setIsLoader(false);
     }
   };
 
   /* ================= FETCH EXISTING BLOG ================= */
 
-  const {
-    data: preBlogData = {},
-    isLoading: blogLoading,
-  } = useQuery({
-    queryKey: ["blog", slug],
-    queryFn: async () => {
-      const response = await axios.get(
-        `${BASEURL}/news/retrieve/slug/${slug}`,
-        {
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            Authorization: localStorage.getItem("token") || "",
-          },
-        }
-      );
-      return response.data;
-    },
-  });
-
   useEffect(() => {
-    if ((preBlogData as any)?.data) {
-      const blog = (preBlogData as any).data;
-
+    if ((data as any)?.data) {
+      const blog = data?.data;
+// console.log(blog)
       setFormData({
         title: blog.title || "",
         slug: blog.slug || "",
@@ -188,22 +170,22 @@ const EditBlog: React.FC = () => {
         image: null,
       });
     }
-  }, [preBlogData]);
+  }, [data]);
 
-  if (blogLoading) return <WaitingLoader />;
+  if (isLoading) return <WaitingLoader />;
 
   /* ================= JSX ================= */
 
   return (
     <div className="py-5">
-      {isLoading && <WaitingLoader />}
+      {isLoader && <WaitingLoader />}
 
-      <h2 className="text-xl font-bold text-[#131523] capitalize mb-4">
+      <h2 className="text-xl font-bold capitalize mb-4">
         Blog Post / Edit Post
       </h2>
 
       <div className="input_wrapper flex gap-5">
-        <div className="left_section w-full md:w-2/3 p-4 bg-white shadow rounded">
+        <div className="left_section w-full md:w-2/3 p-4 shadow rounded">
           <div className="flex flex-col gap-4">
 
             {/* Image */}

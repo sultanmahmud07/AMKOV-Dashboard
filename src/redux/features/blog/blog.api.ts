@@ -4,7 +4,7 @@ export const blogApi = baseApi.injectEndpoints({
       endpoints: (builder) => ({
             addBlog: builder.mutation({
                   query: (blogData) => ({
-                        url: "/news/create",
+                        url: "/blog/create",
                         method: "POST",
                         data: blogData,
                   }),
@@ -12,7 +12,7 @@ export const blogApi = baseApi.injectEndpoints({
             }),
             updateBlogByAdmin: builder.mutation({
                   query: ({ blogId, blogInfo }) => ({
-                        url: `/news/update/${blogId}`,
+                        url: `/blog/${blogId}`,
                         method: "PATCH",
                         data: blogInfo, 
                   }),
@@ -20,21 +20,21 @@ export const blogApi = baseApi.injectEndpoints({
             }),
             removeBlog: builder.mutation({
                   query: (blogId) => ({
-                        url: `/news/${blogId}`,
+                        url: `/blog/${blogId}`,
                         method: "DELETE",
                   }),
                   invalidatesTags: ["BLOG"],
             }),
             getBlogDetails: builder.query({
                   query: (params) => ({
-                        url: `/news/${params}`,
+                        url: `/blog/${params}`,
                         method: "GET",
                   }),
                   transformResponse: (response) => response.data,
             }),
             getAllBlogs: builder.query({
                   query: (params) => ({
-                        url: "/news/retrieve/all",
+                        url: "/blog",
                         method: "GET",
                         params: params,
                   }),

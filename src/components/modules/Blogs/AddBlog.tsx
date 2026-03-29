@@ -146,16 +146,16 @@ const AddBlog = () => {
   return (
     <div className="py-5">
       {isLoading && <WaitingLoader></WaitingLoader>}
-      <h2 className="text-xl font-bold text-[#131523] capitalize mb-4">Blog Post/Create New Post</h2>
+      <h2 className="text-xl font-bold capitalize mb-4">Blog Post/Create New Post</h2>
       <div className="input_wrapper flex gap-5">
-        <div className="left_section w-full md:w-2/3 p-4 bg-white shadow rounded">
+        <div className="left_section w-full md:w-2/3 p-4 shadow rounded">
           <div className="left_input flex flex-col gap-4">
 
             {/* Image Upload Design */}
             <div>
               <label className="block font-medium mb-2">Images</label>
               <div className="border border-dashed border-gray-300 p-6 rounded-lg text-center">
-                <label htmlFor="fileUpload" className="cursor-pointer inline-block bg-green-100 text-green-600 px-4 py-2 rounded border border-green-300">
+                <label htmlFor="fileUpload" className="cursor-pointer inline-block bg-blue-100 text-primary px-4 py-2 rounded border border-green-300">
                   Add File
                 </label>
                 <p className="text-gray-500 mt-2">Or drag and drop files</p>
@@ -235,7 +235,7 @@ const AddBlog = () => {
         {/* Right Section */}
         <div className="right_section w-full md:w-1/3">
           {/* SEO Section */}
-          <div className="p-4 bg-white shadow rounded">
+          <div className="p-4 shadow rounded">
             <h3 className="text-lg font-semibold mb-2">SEO</h3>
             <div className="flex flex-col gap-4">
               <div>
@@ -283,7 +283,7 @@ const AddBlog = () => {
               <button
                 onClick={handleTagAdd}
                 type="button"
-                className="bg-[#1BAE70] text-white px-4 py-1 text-sm rounded"
+                className="bg-primary text-white px-4 py-1 text-sm rounded"
               >
                 Add Tag
               </button>
@@ -315,13 +315,13 @@ const AddBlog = () => {
       <div className="flex items-center gap-4 mt-6">
         <Link
           to={"/news"}
-          className="hover:bg-[#1BAE70] transition hover:text-white bg-transparent border border-[#1BAE70] text-[#1BAE70] px-6 py-2 rounded"
+          className="hover:bg-primary transition hover:text-white bg-transparent border border-primary text-primary px-6 py-2 rounded"
         >
           Cancel
         </Link>
         <button
           onClick={() => handleCreateBlog()}
-          className="bg-[#1BAE70] hover:bg-opacity-90 text-white px-6 py-2 rounded"
+          className="bg-primary hover:bg-opacity-90 text-white px-6 py-2 rounded"
         >
           Publish New
         </button>

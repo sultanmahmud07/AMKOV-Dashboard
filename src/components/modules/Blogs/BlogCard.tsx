@@ -1,43 +1,27 @@
-import axios, { AxiosError } from "axios";
+
 import { FiEdit } from "react-icons/fi";
 import { IoEyeOutline } from "react-icons/io5";
 import { MdDeleteOutline } from "react-icons/md";
 import { toast } from "react-toastify";
 import Swal from "sweetalert2";
 import { LuCalendarDays } from "react-icons/lu";
-import BASEURL from "@/utils/Constants";
 import { Link } from "react-router";
+import { IBlog } from "@/types/blog.type";
+import { useRemoveBlogMutation } from "@/redux/features/blog/blog.api";
 
 /* ================= TYPES ================= */
 
-type BlogCategory = {
-  _id: string;
-  title: string;
-};
-
-export type Blog = {
-  _id: string;
-  category: BlogCategory;
-  title: string;
-  thambnail?: string;
-  content: string;
-  slug: string;
-  metaTitle?: string;
-  metaDescription?: string;
-  tags?: string[];
-  createdAt: string;
-  updatedAt: string;
-};
 
 type BlogCardProps = {
-  blog: Blog;
-  refetch: () => void;
+  blog: IBlog;
 };
 
 /* ================= COMPONENT ================= */
 
-const BlogCard: React.FC<BlogCardProps> = ({ blog, refetch }) => {
-  const handleDeleteBlog = async (blog: Blog): Promise<void> => {
+const BlogCard: React.FC<BlogCardProps> = ({ blog }) => {
+  const [removeBlog] = useRemoveBlogMutation();
+
+  const handleDeleteBlog = async (blog: IBlog): Promise<void> => {
     Swal.fire({
       title: "Are you sure?",
       text: "You won't be able to revert this!",
@@ -48,31 +32,17 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog, refetch }) => {
       confirmButtonText: "Yes, delete it!",
     }).then(async (result) => {
       if (result.isConfirmed) {
+        const toastId = toast.loading("Removing...");
         try {
-          const response = await axios.delete(
-            `${BASEURL}/news/delete/${blog._id}`,
-            {
-              headers: {
-                Authorization: localStorage.getItem("token") || "",
-              },
-            }
-          );
+          const res = await removeBlog(blog?._id).unwrap();
 
-          refetch();
-
-          Swal.fire({
-            title: "Deleted!",
-            text: response.data?.message,
-            icon: "success",
-          });
-        } catch (error) {
-          const err = error as AxiosError<{ message?: string }>;
-
-          toast.error(
-            err.response?.data?.message || "Something went wrong"
-          );
-
-          console.error(err.response?.data || err.message);
+          if (res.success) {
+            toast.success("Parcel remove successfully!");
+            toast.dismiss(toastId);
+          }
+        } catch (err) {
+          toast.dismiss(toastId);
+          console.error(err);
         }
       }
     });
@@ -83,7 +53,7 @@ const BlogCard: React.FC<BlogCardProps> = ({ blog, refetch }) => {
       {/* Image */}
       <div className="overflow-hidden aspect-square rounded-xl">
         <img
-          src={blog.thambnail || "/default-img.png"}
+          src={blog.thumbnail || "/default-img.png"}
           alt={blog.title}
           className="w-full aspect-square object-cover rounded-md transform transition-transform duration-300 group-hover:scale-110"
         />
