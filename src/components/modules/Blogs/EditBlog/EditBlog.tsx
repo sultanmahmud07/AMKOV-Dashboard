@@ -7,7 +7,6 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "react-router";
 import BASEURL from "@/utils/Constants";
 import WaitingLoader from "../../loader/WaitingLoder";
-import UpdateTextEditor from "./UpdateTextEditor";
 
 type FormDataType = {
   title: string;
@@ -39,7 +38,7 @@ const EditBlog: React.FC = () => {
   });
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [tagInput, setTagInput] = useState<string>("");
+  // const [tagInput, setTagInput] = useState<string>("");
 
   const navigate = useNavigate();
   const { slug } = useParams<{ slug: string }>();
@@ -84,22 +83,22 @@ const EditBlog: React.FC = () => {
     }
   };
 
-  const handleTagAdd = (): void => {
-    if (tagInput.trim()) {
-      setFormData((prev) => ({
-        ...prev,
-        tags: [...prev.tags, tagInput.trim()],
-      }));
-      setTagInput("");
-    }
-  };
+  // const handleTagAdd = (): void => {
+  //   if (tagInput.trim()) {
+  //     setFormData((prev) => ({
+  //       ...prev,
+  //       tags: [...prev.tags, tagInput.trim()],
+  //     }));
+  //     setTagInput("");
+  //   }
+  // };
 
-  const handleTagDelete = (index: number): void => {
-    setFormData((prev) => ({
-      ...prev,
-      tags: prev.tags.filter((_, i) => i !== index),
-    }));
-  };
+  // const handleTagDelete = (index: number): void => {
+  //   setFormData((prev) => ({
+  //     ...prev,
+  //     tags: prev.tags.filter((_, i) => i !== index),
+  //   }));
+  // };
 
   /* ================= UPDATE BLOG ================= */
 

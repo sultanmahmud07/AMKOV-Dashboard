@@ -6,6 +6,7 @@ import { Bell, Search, UserPlus } from "lucide-react";
 import { ModeToggle } from "./ModeToggler";
 
 export default function DashboardHeader({ userInfo }: { userInfo: any }) {
+      console.log(userInfo)
       return (
             <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b px-6 bg-background">
                   {/* Left Side: Search Bar & Filter */}

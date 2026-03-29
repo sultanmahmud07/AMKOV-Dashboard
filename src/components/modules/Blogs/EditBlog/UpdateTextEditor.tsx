@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect } from "react";
-import ReactQuill from "react-quill";
+// import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 
 type FormDataType = {
@@ -19,39 +20,39 @@ const UpdateTextEditor: React.FC<UpdateTextEditorProps> = ({
   setFormData,
   previousContent,
 }) => {
-  const quillModules = {
-    toolbar: [
-      [{ header: [1, 2, 3, 4, 5, 6, false] }],
-      [{ size: ["small", false, "large", "huge"] }],
-      ["bold", "italic", "underline", "strike"],
-      [{ color: [] }, { background: [] }],
-      [{ list: "ordered" }, { list: "bullet" }],
-      ["link", "image"],
-      ["clean"],
-    ],
-  };
+  // const quillModules = {
+  //   toolbar: [
+  //     [{ header: [1, 2, 3, 4, 5, 6, false] }],
+  //     [{ size: ["small", false, "large", "huge"] }],
+  //     ["bold", "italic", "underline", "strike"],
+  //     [{ color: [] }, { background: [] }],
+  //     [{ list: "ordered" }, { list: "bullet" }],
+  //     ["link", "image"],
+  //     ["clean"],
+  //   ],
+  // };
 
-  const quillFormats: string[] = [
-    "header",
-    "size",
-    "bold",
-    "italic",
-    "underline",
-    "strike",
-    "color",
-    "background",
-    "list",
-    "bullet",
-    "link",
-    "image",
-  ];
+  // const quillFormats: string[] = [
+  //   "header",
+  //   "size",
+  //   "bold",
+  //   "italic",
+  //   "underline",
+  //   "strike",
+  //   "color",
+  //   "background",
+  //   "list",
+  //   "bullet",
+  //   "link",
+  //   "image",
+  // ];
 
-  const handleContentChange = (value: string): void => {
-    setFormData((prev:any) => ({
-      ...prev,
-      content: value,
-    }));
-  };
+  // const handleContentChange = (value: string): void => {
+  //   setFormData((prev:any) => ({
+  //     ...prev,
+  //     content: value,
+  //   }));
+  // };
 
   // Set initial content only once when previousContent arrives
   useEffect(() => {
@@ -70,13 +71,13 @@ const UpdateTextEditor: React.FC<UpdateTextEditorProps> = ({
         Blog Content
       </label>
 
-      <ReactQuill
+      {/* <ReactQuill
         value={formData.content}
         onChange={handleContentChange}
         modules={quillModules}
         formats={quillFormats}
         className="bg-white rounded"
-      />
+      /> */}
     </div>
   );
 };
