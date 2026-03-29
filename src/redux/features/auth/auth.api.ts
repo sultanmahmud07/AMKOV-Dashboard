@@ -48,6 +48,14 @@ export const authApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["USER"],
     }),
+    forgotPassword: builder.mutation({
+      query: (userInfo) => ({
+        url: `/auth/forgot-password`,
+        method: "POST",
+        data: userInfo,
+      }),
+      invalidatesTags: ["USER"],
+    }),
     userInfo: builder.query({
       query: () => ({
         url: "/user/me",
@@ -65,5 +73,6 @@ export const {
   useVerifyOtpMutation,
   useLogoutMutation,
   useResetPasswordMutation,
+  useForgotPasswordMutation,
   useUserInfoQuery,
 } = authApi;

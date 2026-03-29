@@ -1,5 +1,5 @@
-import React, { useState } from "react";
 import axios from "axios";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import BASEURL from "@/utils/Constants";
 import Loader from "@/pages/Spinner";
@@ -8,7 +8,7 @@ import { Link } from "react-router";
 import BlogCard from "./BlogCard";
 import Pagination from "@/components/shared/Pagination/Pagination";
 
-/* ================= TYPES ================= */
+/* =========== TYPES =========== */
 type BlogCategory = {
   _id: string;
   title: string;

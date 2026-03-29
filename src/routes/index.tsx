@@ -13,6 +13,8 @@ import { role } from "@/constants/role";
 import BlogDetails from "@/components/modules/Blogs/BlogDetails";
 import Analytics from "@/pages/Analytics/Analytics";
 import EditBlog from "@/components/modules/Blogs/EditBlog/EditBlog";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
 
 export const router = createBrowserRouter([
   {
@@ -45,6 +47,14 @@ export const router = createBrowserRouter([
   {
     Component: Login,
     path: "/login",
+  },
+  {
+    Component: ForgotPassword,
+    path: "/forgot-password",
+  },
+  {
+    Component: ResetPassword,
+    path: "/reset-password",
   },
   {
     Component: Verify,
