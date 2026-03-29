@@ -17,10 +17,10 @@ import { Link } from "react-router";
 import { formatDate } from "@/utils/getDateFormater";
 import { Label } from "@/components/ui/label";
 import { IApiError } from "@/types";
-import { ParcelActionMenu } from "../Parcel/ParcelActionMenu";
+import { ProductActionMenu } from "../Product/ProductActionMenu";
 
 
-export default function RecentParcelForOverview() {
+export default function RecentProductForOverview() {
       const [limit] = useState(10);
       const { data, isLoading } = useGetAllParcelsQuery({ page: 1, limit });
       const [removeParcel] = useRemoveParcelMutation();
@@ -62,7 +62,7 @@ export default function RecentParcelForOverview() {
       return (
             <div className="w-full my-5 py-3 border-t">
                   <div className="flex flex-col md:flex-row justify-between items-center gap-3 mb-4">
-                        <h1 className="text-2xl font-bold">Recent Parcels</h1>
+                        <h1 className="text-2xl font-bold">Recent Product</h1>
                         <Link className="underline text-primary" to={"/admin/parcels"}>View all</Link>
                   </div>
                   <Table>
@@ -114,7 +114,7 @@ export default function RecentParcelForOverview() {
                                                                         <Trash2 />
                                                                   </Button>
                                                             </DeleteConfirmation>
-                                                            <ParcelActionMenu parcel={parcel}></ParcelActionMenu>
+                                                            <ProductActionMenu parcel={parcel}></ProductActionMenu>
                                                       </TableCell>
                                                 </TableRow>
                                           ))}

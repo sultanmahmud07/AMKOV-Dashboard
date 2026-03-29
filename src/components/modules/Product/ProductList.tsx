@@ -87,7 +87,7 @@ export default function ParcelList() {
       return (
             <div className="w-full ">
                   <div className="flex flex-col md:flex-row justify-between items-center gap-3 mb-4">
-                        <h1 className="text-2xl font-bold">All Parcels</h1>
+                        <h1 className="text-2xl font-bold">All Products</h1>
                         <Input
                               className="w-full md:w-sm"
                               type="text"

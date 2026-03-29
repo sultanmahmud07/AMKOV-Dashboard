@@ -24,17 +24,17 @@ import { formatDate } from "@/utils/getDateFormater";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UserActionMenu } from "./UserActionMenu";
-import { useGetAllUserQuery, useUpdateUserMutation } from "@/redux/features/user/user.api";
+import { useGetAllAdminQuery, useUpdateUserMutation } from "@/redux/features/user/user.api";
 import { IApiError, IUser } from "@/types";
-import TableSkeleton from "../../loader/Receiver/TableSkeleton";
+import TableSkeleton from "../loader/Receiver/TableSkeleton";
 
 
-export default function AllUserList() {
+export default function AllAdminList() {
       const [currentPage, setCurrentPage] = useState(1);
       const [limit] = useState(10);
       const [searchTerm, setSearchTerm] = useState("")
       const [sortOrder, setSortOrder] = useState("")
-      const { data, isLoading } = useGetAllUserQuery({ page: currentPage, limit, searchTerm, sort: sortOrder });
+      const { data, isLoading } = useGetAllAdminQuery({ page: currentPage, limit, searchTerm, sort: sortOrder });
       const [updateUserByAdmin] = useUpdateUserMutation();
       const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             setSearchTerm(e.target.value)
@@ -61,14 +61,14 @@ export default function AllUserList() {
             }
       };
 
-      const totalPage = data?.meta?.totalPage || 1;
+      const totalPage = 1;
       // console.log(data)
 
 
       return (
             <div className="w-full ">
                   <div className="flex flex-col md:flex-row justify-between items-center gap-3 mb-4">
-                        <h1 className="text-2xl font-bold">Manage User</h1>
+                        <h1 className="text-2xl font-bold">Manage Admin</h1>
                         <Input
                               className="w-full md:w-sm"
                               type="text"

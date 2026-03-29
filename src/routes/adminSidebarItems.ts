@@ -1,20 +1,21 @@
-import UserAnalytics from "@/components/modules/Admin/Analytics/UserAnalytics";
-import AllAdminList from "@/components/modules/Admin/User/AllAdmins";
-import DeletedUserList from "@/components/modules/Admin/User/DeletedUser";
-import AllUserList from "@/components/modules/Admin/User/UserList";
+
+import AllAdminList from "@/components/modules/User/AllAdmins";
+import AllUserList from "@/components/modules/User/UserList";
 import { ISidebarItem } from "@/types";
 import {
   BarChart3,
-  Package,
   PlusSquare,
   Users,
-  UserX,
   Shield,
   User,
   Contact,
+  ListCheck,
+  Camera,
+  Newspaper,
+  NotebookPen,
 } from "lucide-react";
 import MyProfile from "@/pages/Sender/MyProfile";
-import AllContactList from "@/components/modules/Admin/Contact/ContactList";
+import AllContactList from "@/components/modules/Contact/ContactList";
 import Blogs from "@/components/modules/Blogs/Blogs";
 import AddBlog from "@/components/modules/Blogs/AddBlog";
 import Analytics from "@/pages/Analytics/Analytics";
@@ -37,7 +38,7 @@ export const adminSidebarItems: ISidebarItem[] = [
         title: "All Products",
         url: "/products",
         component: Products,
-        icon: Package,
+        icon: Camera,
       },
       {
         title: "Add Product",
@@ -49,31 +50,8 @@ export const adminSidebarItems: ISidebarItem[] = [
         title: "All Categories",
         url: "/categories",
         component: AllCategories,
-        icon: Package,
+        icon: ListCheck,
       },
-    ],
-  },
-  {
-    title: "User Management",
-    items: [
-      {
-        title: "Analytics",
-        url: "/user/analytics",
-        component: UserAnalytics,
-        icon: BarChart3,
-      },
-      {
-        title: "All User",
-        url: "/user/all",
-        component: AllUserList,
-        icon: Users,
-      },
-      {
-        title: "Deleted User",
-        url: "/user/deleted",
-        component: DeletedUserList,
-        icon: UserX,
-      }
     ],
   },
   {
@@ -83,25 +61,19 @@ export const adminSidebarItems: ISidebarItem[] = [
         title: "All News",
         url: "/news",
         component: Blogs,
-        icon: BarChart3,
+        icon: Newspaper,
       },
       {
         title: "Add News",
-        url: "/news/create",
+        url: "/new/create",
         component: AddBlog,
-        icon: Users,
+        icon: NotebookPen,
       },
     ],
   },
   {
     title: "Control Accessibility",
     items: [
-      {
-        title: "Manage Admin",
-        url: "/admin",
-        component: AllAdminList,
-        icon: Shield,
-      },
       {
         title: "My Profile",
         url: "/profile",
@@ -113,6 +85,23 @@ export const adminSidebarItems: ISidebarItem[] = [
         url: "/contact",
         component: AllContactList,
         icon: Contact,
+      },
+    ],
+  },
+  {
+    title: "User Management",
+    items: [
+      {
+        title: "All User",
+        url: "/user/all",
+        component: AllUserList,
+        icon: Users,
+      },
+      {
+        title: "Manage Admin",
+        url: "/admin",
+        component: AllAdminList,
+        icon: Shield,
       },
     ],
   },

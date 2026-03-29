@@ -16,26 +16,26 @@ import {
       PaginationNext,
       PaginationPrevious,
 } from "@/components/ui/pagination";
-import { EyeIcon } from "lucide-react";
+import { EyeIcon, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
-import { useDeliveryParcelByReceiverMutation, useGetParcelByReceiverQuery } from "@/redux/features/parcel/parcel.api";
-import { IParcel } from "@/types/parcel.type";
 import { Link } from "react-router";
 import { formatDate } from "@/utils/getDateFormater";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { IApiError } from "@/types";
+import { UserActionMenu } from "./UserActionMenu";
+import { useGetUnauthorUserQuery, useUpdateUserMutation } from "@/redux/features/user/user.api";
+import { IApiError, IUser } from "@/types";
 import TableSkeleton from "../loader/Receiver/TableSkeleton";
 
 
-export default function ReceiverDelivaryParcelList() {
+export default function AllUnauthorUserList() {
       const [currentPage, setCurrentPage] = useState(1);
       const [limit] = useState(10);
       const [searchTerm, setSearchTerm] = useState("")
       const [sortOrder, setSortOrder] = useState("")
-      const { data, isLoading } = useGetParcelByReceiverQuery({ page: currentPage, limit, searchTerm, sort: sortOrder, status: "DELIVERED" });
-      const [deliveryParcelByReceiver] = useDeliveryParcelByReceiverMutation();
+      const { data, isLoading } = useGetUnauthorUserQuery({ page: currentPage, limit, searchTerm, sort: sortOrder });
+      const [updateUserByAdmin] = useUpdateUserMutation();
       const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             setSearchTerm(e.target.value)
       }
@@ -43,21 +43,24 @@ export default function ReceiverDelivaryParcelList() {
       const handleSortChange = (value: string) => {
             setSortOrder(value)
       }
-      const handleRemoveParcel = async (parcelId: string) => {
-            const toastId = toast.loading("Updating...");
+      const handleRemoveUser = async (userId: string) => {
+            const toastId = toast.loading("Removing...");
+            const userInfo = {
+                  isDeleted: true
+            }
             try {
-                  const res = await deliveryParcelByReceiver(parcelId).unwrap();
+                  const res = await updateUserByAdmin({ userId, userInfo }).unwrap();
                   if (res.success) {
                         toast.dismiss(toastId);
-                        toast.success("Parcel Devlivery successfully");
+                        toast.success("User delete successfully");
                   }
             } catch (err) {
                   console.error(err);
-                  toast.dismiss(toastId);
                   const error = err as IApiError;
                   toast.error(`${error.data.message}`);
             }
       };
+
       const totalPage = data?.meta?.totalPage || 1;
       // console.log(data)
 
@@ -65,7 +68,7 @@ export default function ReceiverDelivaryParcelList() {
       return (
             <div className="w-full ">
                   <div className="flex flex-col md:flex-row justify-between items-center gap-3 mb-4">
-                        <h1 className="text-2xl font-bold">Received Parcels</h1>
+                        <h1 className="text-2xl font-bold">Unverifie User</h1>
                         <Input
                               className="w-full md:w-sm"
                               type="text"
@@ -93,43 +96,42 @@ export default function ReceiverDelivaryParcelList() {
                               <Table>
                                     <TableHeader>
                                           <TableRow>
-                                                <TableHead className="">Type</TableHead>
-                                                <TableHead>Weight</TableHead>
-                                                <TableHead>Deu Amount</TableHead>
-                                                <TableHead>Delivery Date</TableHead>
-                                                <TableHead className="">Tracking Id</TableHead>
+                                                <TableHead className="">Name</TableHead>
+                                                <TableHead>Email</TableHead>
+                                                <TableHead>Role</TableHead>
+                                                <TableHead>Date</TableHead>
                                                 <TableHead className="">Status</TableHead>
                                                 <TableHead className="text-center">Action</TableHead>
                                           </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                          {data?.map((parcel: IParcel) => (
-                                                <TableRow key={parcel._id}>
-                                                      <TableCell className="font-medium">{parcel.type}</TableCell>
-                                                      <TableCell className="font-medium">{parcel.weight}</TableCell>
-                                                      <TableCell>{parcel.fee || 0}</TableCell>
-                                                      <TableCell className="">{formatDate(parcel.deliveryDate)}</TableCell>
-                                                      <TableCell>{parcel.trackingId}</TableCell>
-                                                      <TableCell className={`${parcel.status == "DELIVERED" && "text-green-600 font-bold"} ${parcel.status == "CANCELED" && "text-red-600 font-bold"} ${parcel.status == "REQUESTED" && "text-yellow-600 font-bold"} `}>{parcel.status}</TableCell>
-                                                      <TableCell className="flex items-center gap-2">
-                                                            <Link className="w-full cursor-pointer" to={`/receiver/parcel/${parcel._id}`}>
+                                          {data?.data.map((user: IUser) => (
+                                                <TableRow key={user._id}>
+                                                      <TableCell className="font-bold uppercase">{user.name}</TableCell>
+                                                      <TableCell className="font-medium">{user.email}</TableCell>
+                                                      <TableCell>{user.role}</TableCell>
+                                                      <TableCell className="">{formatDate(user.createdAt)}</TableCell>
+                                                      <TableCell>{user.isActive}</TableCell>
+                                                      <TableCell className="flex items-center justify-end gap-2">
+                                                            <Link className="cursor-pointer" to={`/admin/user/${user._id}`}>
                                                                   <Button size="sm">
                                                                         <EyeIcon />
                                                                   </Button>
                                                             </Link>
                                                             <DeleteConfirmation
-                                                                  onConfirm={() => handleRemoveParcel(parcel._id)}
+                                                                  onConfirm={() => handleRemoveUser(user._id)}
                                                             >
-                                                                  <Button disabled={parcel.status == "DELIVERED"} size="sm">
-                                                                        DELIVERED
+                                                                  <Button size="sm">
+                                                                        <Trash2 />
                                                                   </Button>
                                                             </DeleteConfirmation>
+                                                            <UserActionMenu user={user}></UserActionMenu>
                                                       </TableCell>
                                                 </TableRow>
                                           ))}
                                     </TableBody>
                               </Table>
-                        }
+                  }
                   {totalPage > 1 && (
                         <div className="flex justify-end mt-4">
                               <div>

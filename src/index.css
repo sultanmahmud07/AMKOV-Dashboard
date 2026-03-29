@@ -124,9 +124,9 @@
   width: 90%;
   margin: auto;
 }
-.active{
+/* .active{
   color: var(--primary);
-}
+} */
 
 .achieve_top_section {
   background-color: var(--popover);

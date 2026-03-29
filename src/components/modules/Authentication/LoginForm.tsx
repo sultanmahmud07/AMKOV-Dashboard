@@ -32,17 +32,11 @@ export function LoginForm({
       const res = await login(data).unwrap();
       if (res.success) {
         toast.success("Logged in successfully");
-        if (
-          res.data.user.role === "SUPER_ADMIN" ||
-          res.data.user.role === "ADMIN"
-        ) {
-          navigate("/analytics");
-        } else {
-          navigate("/");
-        }
+       navigate("/");
       }
     } catch (err) {
       const error = err as IApiError;
+      console.log(err)
       toast.error(`${error.data.message}`);
     }
   };

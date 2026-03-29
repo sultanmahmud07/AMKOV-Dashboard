@@ -1,9 +1,7 @@
-import AdminAnalytics from "@/components/modules/Admin/Analytics/AdminAnalytics";
+import AdminAnalytics from "@/components/modules/Analytics/AdminAnalytics";
 
 export default function Analytics() {
   return (
-    <div>
-      <AdminAnalytics></AdminAnalytics>
-    </div>
+    <AdminAnalytics></AdminAnalytics>
   );
 }

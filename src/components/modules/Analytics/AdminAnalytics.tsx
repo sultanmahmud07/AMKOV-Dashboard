@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGetAllParcelsQuery } from "@/redux/features/parcel/parcel.api";
 import {
@@ -16,8 +17,8 @@ import {
 
 // ✅ lucide-react icons
 import { Package, CheckCircle2, Truck, Clock } from "lucide-react";
-import RecentParcelForOverview from "./RecentParcelForOverview";
-import AnalyticsSkeleton from "../../loader/Receiver/AnalyticsSkeleton";
+import AnalyticsSkeleton from "../loader/Receiver/AnalyticsSkeleton";
+import RecentProductForOverview from "./RecentProductForOverview";
 
 const COLORS = ["#10B981", "#3B82F6", "#F59E0B", "#EF4444"];
 
@@ -155,7 +156,7 @@ const AdminAnalytics = () => {
           </CardContent>
         </Card>
       </div>
-      <RecentParcelForOverview></RecentParcelForOverview>
+      <RecentProductForOverview></RecentProductForOverview>
     </div>
   );
 };

@@ -16,24 +16,26 @@ import {
       PaginationNext,
       PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Trash2 } from "lucide-react";
+import { EyeIcon, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
+import { Link } from "react-router";
 import { formatDate } from "@/utils/getDateFormater";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { IContact } from "@/types";
-import { useGetAllContactQuery, useRemoveContactMutation } from "@/redux/features/contact/contact.api";
-import TableSkeleton from "../../loader/Receiver/TableSkeleton";
+import { UserActionMenu } from "./UserActionMenu";
+import { useGetAllUserQuery, useUpdateUserMutation } from "@/redux/features/user/user.api";
+import { IApiError, IUser } from "@/types";
+import TableSkeleton from "../loader/Receiver/TableSkeleton";
 
 
-export default function AllContactList() {
+export default function AllUserList() {
       const [currentPage, setCurrentPage] = useState(1);
       const [limit] = useState(10);
       const [searchTerm, setSearchTerm] = useState("")
       const [sortOrder, setSortOrder] = useState("")
-      const { data, isLoading } = useGetAllContactQuery({ page: currentPage, limit, searchTerm, sort: sortOrder });
-      const [removeContact] = useRemoveContactMutation();
+      const { data, isLoading } = useGetAllUserQuery({ page: currentPage, limit, searchTerm, sort: sortOrder });
+      const [updateUserByAdmin] = useUpdateUserMutation();
       const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             setSearchTerm(e.target.value)
       }
@@ -41,18 +43,21 @@ export default function AllContactList() {
       const handleSortChange = (value: string) => {
             setSortOrder(value)
       }
-      const handleRemoveUser = async (contactId: string) => {
+      const handleRemoveUser = async (userId: string) => {
             const toastId = toast.loading("Removing...");
+            const userInfo = {
+                  isDeleted: true
+            }
             try {
-                  const res = await removeContact(contactId).unwrap();
-
+                  const res = await updateUserByAdmin({ userId, userInfo }).unwrap();
                   if (res.success) {
-                        toast.success("Contact remove successfully!");
                         toast.dismiss(toastId);
+                        toast.success("User delete successfully");
                   }
             } catch (err) {
-                  toast.dismiss(toastId);
                   console.error(err);
+                  const error = err as IApiError;
+                  toast.error(`${error.data.message}`);
             }
       };
 
@@ -93,26 +98,26 @@ export default function AllContactList() {
                                           <TableRow>
                                                 <TableHead className="">Name</TableHead>
                                                 <TableHead>Email</TableHead>
-                                                <TableHead>Phone</TableHead>
+                                                <TableHead>Role</TableHead>
                                                 <TableHead>Date</TableHead>
-                                                <TableHead className="">Message</TableHead>
+                                                <TableHead className="">Status</TableHead>
                                                 <TableHead className="text-center">Action</TableHead>
                                           </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                          {data?.data.map((user: IContact) => (
+                                          {data?.data.map((user: IUser) => (
                                                 <TableRow key={user._id}>
                                                       <TableCell className="font-bold uppercase">{user.name}</TableCell>
                                                       <TableCell className="font-medium">{user.email}</TableCell>
-                                                      <TableCell>{user.phone}</TableCell>
+                                                      <TableCell>{user.role}</TableCell>
                                                       <TableCell className="">{formatDate(user.createdAt)}</TableCell>
-                                                      <TableCell>{user.message}</TableCell>
+                                                      <TableCell>{user.isActive}</TableCell>
                                                       <TableCell className="flex items-center justify-end gap-2">
-                                                            {/* <Link className="cursor-pointer" to={`/admin/user/${user._id}`}>
+                                                            <Link className="cursor-pointer" to={`/admin/user/${user._id}`}>
                                                                   <Button size="sm">
                                                                         <EyeIcon />
                                                                   </Button>
-                                                            </Link> */}
+                                                            </Link>
                                                             <DeleteConfirmation
                                                                   onConfirm={() => handleRemoveUser(user._id)}
                                                             >
@@ -120,6 +125,7 @@ export default function AllContactList() {
                                                                         <Trash2 />
                                                                   </Button>
                                                             </DeleteConfirmation>
+                                                            <UserActionMenu user={user}></UserActionMenu>
                                                       </TableCell>
                                                 </TableRow>
                                           ))}
