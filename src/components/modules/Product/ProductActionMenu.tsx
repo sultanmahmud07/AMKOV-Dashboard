@@ -1,74 +1,52 @@
-
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
       DropdownMenu,
-      DropdownMenuCheckboxItem,
+      DropdownMenuItem,
       DropdownMenuContent,
       DropdownMenuLabel,
       DropdownMenuSeparator,
       DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { useUpdateParcelByAdminMutation } from "@/redux/features/parcel/parcel.api"
-import { useNavigate } from "react-router"
-import { IParcel } from "@/types/parcel.type"
-import { toast } from "sonner"
-import { IApiError } from "@/types"
-import { EllipsisVertical } from "lucide-react"
+} from "@/components/ui/dropdown-menu";
+import config from "@/config";
+import { IProduct } from "@/types/product.type";
+import { CopyIcon, Edit, MoreVertical } from "lucide-react";
+import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
-const parcelStatusOptions = [
-      "REQUESTED"
-      , "APPROVED"
-      , "DISPATCHED"
-      , "IN_TRANSIT"
-      , "DELIVERED"
-      , "CANCELED"
-      , "BLOCKED"
-      , "UNBLOCKED"] as const;
-
-export function ProductActionMenu({ parcel }: { parcel: IParcel }) {
-      const [updateParcelByAdmin] = useUpdateParcelByAdminMutation();
+export function ProductActionMenu({ product }: { product: IProduct }) {
       const navigate = useNavigate();
 
-      const handleStatusUpdate = async (status: string) => {
-            const toastId = toast.loading("Updating...");
-            const parcelId = parcel?._id || "";
-            const parcelInfo = {
-                  status: status
-            }
-            try {
-                  const res = await updateParcelByAdmin({ parcelId, parcelInfo }).unwrap();
-                  if (res.success) {
-                        toast.dismiss(toastId);
-                        toast.success("Parcel status updated successfully");
-                        navigate("/admin/parcels");
-                  }
-            } catch (err) {
-                  console.error(err);
-                  const error = err as IApiError;
-                  toast.error(`${error.data.message}`);
-            }
+      const copyToClipboard = () => {
+            // navigator.clipboard.writeText(`${window.location.origin}/product/view/${product.slug}`);
+            navigator.clipboard.writeText(`${config.clientUrl}/products/${product.slug}`);
+            toast.success("Product slug copied to clipboard!");
       };
 
       return (
             <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                        <Button variant="outline"><EllipsisVertical size={72} color="#3d6eff" strokeWidth={4.25} /></Button>
+                        <Button variant="ghost" size="icon">
+                              <MoreVertical size={16} />
+                        </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56">
-                        <DropdownMenuLabel>Update Status</DropdownMenuLabel>
+                  <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuLabel>Quick Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        {
-                              parcelStatusOptions.map((status) => (
-                                    <DropdownMenuCheckboxItem
-                                          key={status}
-                                          checked={parcel.status === status}
-                                          onCheckedChange={() => handleStatusUpdate(status)}
-                                    >
-                                          {status}
-                                    </DropdownMenuCheckboxItem>
-                              ))
-                        }
+                        <DropdownMenuItem 
+                              className="cursor-pointer"
+                              onClick={() => navigate(`/product/edit/${product.slug}`)}
+                        >
+                              <Edit className="mr-2 h-4 w-4" />
+                              <span>Edit Product</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                              className="cursor-pointer"
+                              onClick={copyToClipboard}
+                        >
+                              <CopyIcon className="mr-2 h-4 w-4" />
+                              <span>Copy Slug</span>
+                        </DropdownMenuItem>
                   </DropdownMenuContent>
             </DropdownMenu>
-      )
+      );
 }

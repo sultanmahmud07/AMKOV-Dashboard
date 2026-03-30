@@ -1,3 +1,8 @@
+import { useState } from "react";
+import { Link } from "react-router";
+import { EyeIcon, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+
 import { DeleteConfirmation } from "@/components/DeleteConfirmation";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,73 +21,53 @@ import {
       PaginationNext,
       PaginationPrevious,
 } from "@/components/ui/pagination";
-import { EyeIcon, Trash2 } from "lucide-react";
-import { toast } from "sonner";
-import { useState } from "react";
-import { useBlockParcelByAdminMutation, useGetAllParcelsQuery, useRemoveParcelMutation } from "@/redux/features/parcel/parcel.api";
-import { IParcel } from "@/types/parcel.type";
-import { Link } from "react-router";
-import { formatDate } from "@/utils/getDateFormater";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { IApiError } from "@/types";
-import { Switch } from "@/components/ui/switch";
 import ProductTableSkeleton from "../loader/Product/TableSkeleton";
-import { ProductActionMenu } from "./ProductActionMenu";
+
+// Import the separated Action Menu component (Adjust path if needed)
+import { ProductActionMenu } from "./ProductActionMenu"; 
+
+// Redux hooks and Types
+import { useGetAllProductsQuery, useRemoveProductMutation } from "@/redux/features/product/product.api";
+import { IProduct } from "@/types/product.type"; // Adjust path if needed
+import { formatDate } from "@/utils/getDateFormater";
 
 
-export default function ParcelList() {
+export default function ProductList() {
       const [currentPage, setCurrentPage] = useState(1);
       const [limit] = useState(10);
-      const [searchTerm, setSearchTerm] = useState("")
-      const [sortOrder, setSortOrder] = useState("")
-      const { data, isLoading } = useGetAllParcelsQuery({ page: currentPage, limit, searchTerm, sort: sortOrder });
-      const [removeParcel] = useRemoveParcelMutation();
-      const [blockParcelByAdmin] = useBlockParcelByAdminMutation();
+      const [searchTerm, setSearchTerm] = useState("");
+      const [sortOrder, setSortOrder] = useState("");
+      
+      const { data, isLoading } = useGetAllProductsQuery({ page: currentPage, limit, searchTerm, sort: sortOrder });
+      const [removeProduct] = useRemoveProductMutation();
+
       const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-            setSearchTerm(e.target.value)
-      }
+            setSearchTerm(e.target.value);
+            setCurrentPage(1); // Reset to first page on new search
+      };
 
       const handleSortChange = (value: string) => {
-            setSortOrder(value)
-      }
-      const handleRemoveParcel = async (parcelId: string) => {
-            const toastId = toast.loading("Removing...");
-            try {
-                  const res = await removeParcel(parcelId).unwrap();
+            setSortOrder(value);
+      };
 
+      const handleRemoveProduct = async (productId: string) => {
+            const toastId = toast.loading("Removing product...");
+            try {
+                  const res = await removeProduct(productId).unwrap();
                   if (res.success) {
-                        toast.success("Parcel remove successfully!");
+                        toast.success("Product removed successfully!");
                         toast.dismiss(toastId);
                   }
             } catch (err) {
                   toast.dismiss(toastId);
                   console.error(err);
+                  toast.error("Failed to remove product");
             }
       };
 
-      const handleUpdateParcel = async (parcel: IParcel) => {
-            const toastId = toast.loading("Updating...");
-            const parcelId = parcel?._id || "";
-            const parcelInfo = {
-                  isBlocked: !parcel.isBlocked
-            }
-            try {
-                  const res = await blockParcelByAdmin({ parcelId, parcelInfo }).unwrap();
-                  if (res.success) {
-                        toast.dismiss(toastId);
-                        toast.success("Parcel updated successfully");
-                  }
-            } catch (err) {
-                  console.error(err);
-                  const error = err as IApiError;
-                  toast.error(`${error.data.message}`);
-            }
-      };
       const totalPage = data?.meta?.totalPage || 1;
-      // console.log(data)
-
 
       return (
             <div className="w-full ">
@@ -91,116 +76,122 @@ export default function ParcelList() {
                         <Input
                               className="w-full md:w-sm"
                               type="text"
-                              placeholder="Search here.."
+                              placeholder="Search products..."
                               value={searchTerm}
                               onChange={handleSearchChange}
                         />
                         <Select onValueChange={handleSortChange} value={sortOrder}>
                               <SelectTrigger className="md:w-[180px]">
-                                    <SelectValue placeholder="Select a list order" />
+                                    <SelectValue placeholder="Sort by" />
                               </SelectTrigger>
                               <SelectContent>
                                     <SelectGroup>
                                           <SelectLabel>Order By</SelectLabel>
-                                          <SelectItem value="createdAt">Ascending</SelectItem>
-                                          <SelectItem value="-createdAt">Descending</SelectItem>
+                                          <SelectItem value="-createdAt">Newest First</SelectItem>
+                                          <SelectItem value="createdAt">Oldest First</SelectItem>
+                                          <SelectItem value="basePrice">Price: Low to High</SelectItem>
+                                          <SelectItem value="-basePrice">Price: High to Low</SelectItem>
                                     </SelectGroup>
                               </SelectContent>
                         </Select>
                   </div>
-                  {
-                        isLoading ?
-                              <ProductTableSkeleton></ProductTableSkeleton>
-                              :
-                              <Table>
-                                    <TableHeader>
-                                          <TableRow>
-                                                <TableHead className="">Type</TableHead>
-                                                <TableHead>Weight</TableHead>
-                                                <TableHead>Deu Amount</TableHead>
-                                                <TableHead>Delivery Date</TableHead>
-                                                <TableHead className="">Address</TableHead>
-                                                <TableHead className="text-center">Action</TableHead>
-                                          </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                          {data?.data.map((parcel: IParcel) => (
-                                                <TableRow key={parcel._id}>
-                                                      <TableCell className="font-medium">{parcel.type}</TableCell>
-                                                      <TableCell className="font-medium">{parcel.weight}</TableCell>
-                                                      <TableCell>{parcel.fee || 0}</TableCell>
-                                                      <TableCell className="">{formatDate(parcel.deliveryDate)}</TableCell>
-                                                      <TableCell>
-                                                            {parcel.address.length > 25
-                                                                  ? parcel.address.slice(0, 25) + ".."
-                                                                  : parcel.address}
-                                                      </TableCell>
-                                                      <TableCell className="flex items-center gap-2">
-                                                            <div className="flex items-center space-x-2">
-                                                                  <Switch
-                                                                        checked={parcel.isBlocked}
-                                                                        id="airplane-mode" onClick={() => handleUpdateParcel(parcel)} />
-                                                                  <Label htmlFor="airplane-mode">{parcel.isBlocked ? "Blocked" : "Unblock"}</Label>
+                  
+                  {isLoading ? (
+                        <ProductTableSkeleton />
+                  ) : (
+                        <Table>
+                              <TableHeader>
+                                    <TableRow>
+                                          <TableHead>Image</TableHead>
+                                          <TableHead>Name</TableHead>
+                                          <TableHead>Slug</TableHead>
+                                          <TableHead>Base Price</TableHead>
+                                          <TableHead>Date Added</TableHead>
+                                          <TableHead className="text-right">Action</TableHead>
+                                    </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                    {data?.data?.map((product: IProduct) => (
+                                          <TableRow key={product._id}>
+                                                <TableCell>
+                                                      {product.images && product.images.length > 0 ? (
+                                                            <img 
+                                                                  src={product.images[0]} 
+                                                                  alt={product.name} 
+                                                                  className="w-12 h-12 rounded-md object-cover border"
+                                                            />
+                                                      ) : (
+                                                            <div className="w-12 h-12 bg-gray-200 rounded-md flex items-center justify-center text-xs text-gray-500">
+                                                                  No Img
                                                             </div>
-                                                            <Link className="w-full cursor-pointer" to={`/admin/parcel/${parcel._id}`}>
-                                                                  <Button size="sm">
-                                                                        <EyeIcon />
-                                                                  </Button>
-                                                            </Link>
-                                                            <DeleteConfirmation
-                                                                  onConfirm={() => handleRemoveParcel(parcel._id)}
-                                                            >
-                                                                  <Button size="sm">
-                                                                        <Trash2 />
-                                                                  </Button>
-                                                            </DeleteConfirmation>
-                                                            <ProductActionMenu parcel={parcel}></ProductActionMenu>
-                                                      </TableCell>
-                                                </TableRow>
-                                          ))}
-                                    </TableBody>
-                              </Table>
-                  }
+                                                      )}
+                                                </TableCell>
+                                                <TableCell className="font-medium">
+                                                      {product.name.length > 30 
+                                                            ? product.name.slice(0, 30) + "..." 
+                                                            : product.name}
+                                                </TableCell>
+                                                <TableCell className="text-gray-500 text-sm">{product.slug}</TableCell>
+                                                <TableCell className="font-semibold">${product.basePrice.toFixed(2)}</TableCell>
+                                                <TableCell>{formatDate(product.createdAt)}</TableCell>
+                                                <TableCell className="flex justify-end items-center gap-2">
+                                                      <Link to={`/product/view/${product.slug}`}>
+                                                            <Button size="icon" variant="outline" title="View Details">
+                                                                  <EyeIcon size={16} />
+                                                            </Button>
+                                                      </Link>
+                                                      <DeleteConfirmation
+                                                            onConfirm={() => handleRemoveProduct(product._id || "")}
+                                                      >
+                                                            <Button size="icon" variant="destructive" title="Delete Product">
+                                                                  <Trash2 size={16} />
+                                                            </Button>
+                                                      </DeleteConfirmation>
+                                                      
+                                                      <ProductActionMenu product={product} />
+                                                </TableCell>
+                                          </TableRow>
+                                    ))}
+                              </TableBody>
+                        </Table>
+                  )}
+
                   {totalPage > 1 && (
                         <div className="flex justify-end mt-4">
-                              <div>
-                                    <Pagination>
-                                          <PaginationContent>
-                                                <PaginationItem>
-                                                      <PaginationPrevious
-                                                            onClick={() => setCurrentPage((prev) => prev - 1)}
-                                                            className={
-                                                                  currentPage === 1
-                                                                        ? "pointer-events-none opacity-50"
-                                                                        : "cursor-pointer"
-                                                            }
-                                                      />
+                              <Pagination>
+                                    <PaginationContent>
+                                          <PaginationItem>
+                                                <PaginationPrevious
+                                                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                                      className={
+                                                            currentPage === 1
+                                                                  ? "pointer-events-none opacity-50"
+                                                                  : "cursor-pointer"
+                                                      }
+                                                />
+                                          </PaginationItem>
+                                          {Array.from({ length: totalPage }, (_, index) => index + 1).map((page) => (
+                                                <PaginationItem
+                                                      key={page}
+                                                      onClick={() => setCurrentPage(page)}
+                                                >
+                                                      <PaginationLink className="cursor-pointer" isActive={currentPage === page}>
+                                                            {page}
+                                                      </PaginationLink>
                                                 </PaginationItem>
-                                                {Array.from({ length: totalPage }, (_, index) => index + 1).map(
-                                                      (page) => (
-                                                            <PaginationItem
-                                                                  key={page}
-                                                                  onClick={() => setCurrentPage(page)}
-                                                            >
-                                                                  <PaginationLink className="cursor-pointer" isActive={currentPage === page}>
-                                                                        {page}
-                                                                  </PaginationLink>
-                                                            </PaginationItem>
-                                                      )
-                                                )}
-                                                <PaginationItem>
-                                                      <PaginationNext
-                                                            onClick={() => setCurrentPage((prev) => prev + 1)}
-                                                            className={
-                                                                  currentPage === totalPage
-                                                                        ? "pointer-events-none opacity-50"
-                                                                        : "cursor-pointer"
-                                                            }
-                                                      />
-                                                </PaginationItem>
-                                          </PaginationContent>
-                                    </Pagination>
-                              </div>
+                                          ))}
+                                          <PaginationItem>
+                                                <PaginationNext
+                                                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPage))}
+                                                      className={
+                                                            currentPage === totalPage
+                                                                  ? "pointer-events-none opacity-50"
+                                                                  : "cursor-pointer"
+                                                      }
+                                                />
+                                          </PaginationItem>
+                                    </PaginationContent>
+                              </Pagination>
                         </div>
                   )}
             </div>

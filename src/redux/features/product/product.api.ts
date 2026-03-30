@@ -50,7 +50,7 @@ export const productApi = baseApi.injectEndpoints({
             
             getAllProducts: builder.query({
                   query: (params) => ({
-                        url: "/product/all-products",
+                        url: "/product",
                         method: "GET",
                         params: params,
                   }),

@@ -18,6 +18,8 @@ import ResetPassword from "@/pages/ResetPassword";
 import CategoryDetailPage from "@/pages/Category/CategoryDetails";
 import EditCategory from "@/pages/Category/EditCategory";
 import AddCategory from "@/pages/Category/AddCategory";
+import EditProduct from "@/pages/Product/EditProduct";
+import ProductDetails from "@/pages/Product/ProductDetails";
 
 export const router = createBrowserRouter([
   {
@@ -52,6 +54,14 @@ export const router = createBrowserRouter([
       {
         path: "/category/edit/:slug",
         Component: EditCategory,
+      },
+      {
+        path: "/product/view/:slug",
+        Component: ProductDetails,
+      },
+      {
+        path: "/product/edit/:slug",
+        Component: EditProduct,
       },
       {
         path: "/user/:id",

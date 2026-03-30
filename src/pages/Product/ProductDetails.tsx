@@ -1,9 +1,8 @@
+import ViewProductDetails from "@/components/modules/Product/ProductDetails"
 
 const ProductDetails = () => {
   return (
-    <div>
-      Product Details
-    </div>
+    <ViewProductDetails />
   )
 }
 
