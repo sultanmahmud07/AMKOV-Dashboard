@@ -26,7 +26,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import ProductTableSkeleton from "../loader/Product/TableSkeleton";
 
 // Import the separated Action Menu component (Adjust path if needed)
-import { ProductActionMenu } from "./ProductActionMenu"; 
+import { ProductActionMenu } from "./ProductActionMenu";
 
 // Redux hooks and Types
 import { useGetAllProductsQuery, useRemoveProductMutation } from "@/redux/features/product/product.api";
@@ -39,7 +39,7 @@ export default function ProductList() {
       const [limit] = useState(10);
       const [searchTerm, setSearchTerm] = useState("");
       const [sortOrder, setSortOrder] = useState("");
-      
+
       const { data, isLoading } = useGetAllProductsQuery({ page: currentPage, limit, searchTerm, sort: sortOrder });
       const [removeProduct] = useRemoveProductMutation();
 
@@ -95,7 +95,7 @@ export default function ProductList() {
                               </SelectContent>
                         </Select>
                   </div>
-                  
+
                   {isLoading ? (
                         <ProductTableSkeleton />
                   ) : (
@@ -115,9 +115,9 @@ export default function ProductList() {
                                           <TableRow key={product._id}>
                                                 <TableCell>
                                                       {product.images && product.images.length > 0 ? (
-                                                            <img 
-                                                                  src={product.images[0]} 
-                                                                  alt={product.name} 
+                                                            <img
+                                                                  src={product.images[0]}
+                                                                  alt={product.name}
                                                                   className="w-12 h-12 rounded-md object-cover border"
                                                             />
                                                       ) : (
@@ -127,8 +127,8 @@ export default function ProductList() {
                                                       )}
                                                 </TableCell>
                                                 <TableCell className="font-medium">
-                                                      {product.name.length > 30 
-                                                            ? product.name.slice(0, 30) + "..." 
+                                                      {product.name.length > 30
+                                                            ? product.name.slice(0, 30) + "..."
                                                             : product.name}
                                                 </TableCell>
                                                 <TableCell className="text-gray-500 text-sm">{product.slug}</TableCell>
@@ -147,7 +147,7 @@ export default function ProductList() {
                                                                   <Trash2 size={16} />
                                                             </Button>
                                                       </DeleteConfirmation>
-                                                      
+
                                                       <ProductActionMenu product={product} />
                                                 </TableCell>
                                           </TableRow>
