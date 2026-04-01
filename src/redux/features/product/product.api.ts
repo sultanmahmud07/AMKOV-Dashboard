@@ -57,6 +57,14 @@ export const productApi = baseApi.injectEndpoints({
                   providesTags: ["PRODUCT"],
                   transformResponse: (response) => response,
             }),
+            getDashboardAnalytics: builder.query({
+                  query: (params) => ({
+                        url: "/stats/analytics",
+                        method: "GET",
+                        params: params,
+                  }),
+                  transformResponse: (response) => response,
+            }),
       }),
 });
 
@@ -68,4 +76,5 @@ export const {
       useRemoveProductMutation,
       useGetProductDetailsQuery,
       useGetAllProductsQuery,
+      useGetDashboardAnalyticsQuery,
 } = productApi;

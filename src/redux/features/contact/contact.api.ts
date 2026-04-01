@@ -2,28 +2,19 @@ import { baseApi } from "@/redux/baseApi";
 
 export const contactApi = baseApi.injectEndpoints({
       endpoints: (builder) => ({
-            addContact: builder.mutation({
-                  query: (contactData) => ({
-                        url: "/contact/create",
-                        method: "POST",
-                        data: contactData,
-                  }),
-                  invalidatesTags: ["CONTACT"],
-            }),
-            updateContactByAdmin: builder.mutation({
-                  query: ({ contactId, contactInfo }) => ({
-                        url: `/contact/${contactId}`,
-                        method: "PATCH",
-                        data: contactInfo, 
-                  }),
-                  invalidatesTags: ["CONTACT"],
-            }),
             removeContact: builder.mutation({
                   query: (contactId) => ({
                         url: `/contact/${contactId}`,
                         method: "DELETE",
                   }),
                   invalidatesTags: ["CONTACT"],
+            }),
+               getContactDetails: builder.query({
+                  query: (params) => ({
+                        url: `/contact/${params}`,
+                        method: "GET",
+                  }),
+                  transformResponse: (response) => response.data,
             }),
             getAllContact: builder.query({
                   query: (params) => ({
@@ -38,8 +29,7 @@ export const contactApi = baseApi.injectEndpoints({
 });
 
 export const {
-      useAddContactMutation,
-      useUpdateContactByAdminMutation,
       useRemoveContactMutation,
+      useGetContactDetailsQuery,
       useGetAllContactQuery,
 } = contactApi;

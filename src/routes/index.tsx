@@ -21,6 +21,7 @@ import AddCategory from "@/pages/Category/AddCategory";
 import EditProduct from "@/pages/Product/EditProduct";
 import ProductDetails from "@/pages/Product/ProductDetails";
 import AddAdmin from "@/components/modules/Admin/AddAdmin";
+import ContactDetails from "@/components/modules/Contact/ContactDetails";
 
 export const router = createBrowserRouter([
   {
@@ -71,6 +72,10 @@ export const router = createBrowserRouter([
       {
         path: "/user/:id",
         Component: UserDetails,
+      },
+      {
+        path: "/contact/:id",
+        Component: ContactDetails,
       },
     ],
   },
