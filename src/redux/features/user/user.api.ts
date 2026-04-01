@@ -2,6 +2,22 @@ import { baseApi } from "@/redux/baseApi";
 
 export const userApi = baseApi.injectEndpoints({
       endpoints: (builder) => ({
+             addAdmin: builder.mutation({
+                  query: (userInfo) => ({
+                        url: "/user/register",
+                        method: "POST",
+                        data: userInfo,
+                  }),
+                  invalidatesTags: ["USER"],
+            }),
+            updateProfile: builder.mutation({
+                  query: (userInfo) => ({
+                        url: `/user/profile`,
+                        method: "PATCH",
+                        data: userInfo, 
+                  }),
+                  invalidatesTags: ["USER"],
+            }),
             updateUser: builder.mutation({
                   query: ({ userId, userInfo }) => ({
                         url: `/user/${userId}`,
@@ -51,24 +67,16 @@ export const userApi = baseApi.injectEndpoints({
                   providesTags: ["USER"],
                   transformResponse: (response) => response,
             }),
-            getUnauthorUser: builder.query({
-                  query: (params) => ({
-                        url: "/user/unauthor-users",
-                        method: "GET",
-                        params: params,
-                  }),
-                  providesTags: ["USER"],
-                  transformResponse: (response) => response,
-            }),
       }),
 });
 
 export const {
+      useAddAdminMutation,
+      useUpdateProfileMutation,
       useUpdateUserMutation,
       useRemoveUserMutation,
       useGetUserDetailsQuery,
       useGetAllUserQuery,
       useGetAllAdminQuery,
       useGetDeletedUserQuery,
-      useGetUnauthorUserQuery,
 } = userApi;

@@ -20,6 +20,7 @@ import EditCategory from "@/pages/Category/EditCategory";
 import AddCategory from "@/pages/Category/AddCategory";
 import EditProduct from "@/pages/Product/EditProduct";
 import ProductDetails from "@/pages/Product/ProductDetails";
+import AddAdmin from "@/components/modules/Admin/AddAdmin";
 
 export const router = createBrowserRouter([
   {
@@ -34,6 +35,10 @@ export const router = createBrowserRouter([
       {
         Component: Register,
         path: "/register",
+      },
+      {
+        Component: AddAdmin,
+        path: "/admin/invite",
       },
       {
         path: "/news/view/:slug",

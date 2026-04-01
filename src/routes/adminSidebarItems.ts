@@ -14,7 +14,6 @@ import {
   Newspaper,
   NotebookPen,
 } from "lucide-react";
-import MyProfile from "@/pages/Sender/MyProfile";
 import AllContactList from "@/components/modules/Contact/ContactList";
 import Blogs from "@/components/modules/Blogs/Blogs";
 import AddBlog from "@/components/modules/Blogs/AddBlog";
@@ -22,6 +21,7 @@ import Analytics from "@/pages/Analytics/Analytics";
 import Products from "@/pages/Product/Products";
 import AddProduct from "@/pages/Product/AddProduct";
 import AllCategories from "@/pages/Category/AllCategories";
+import MyProfile from "@/pages/Profile/MyProfile";
 
 
 export const adminSidebarItems: ISidebarItem[] = [

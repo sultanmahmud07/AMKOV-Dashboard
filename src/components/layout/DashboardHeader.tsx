@@ -4,6 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Bell, Search, UserPlus } from "lucide-react";
 import { ModeToggle } from "./ModeToggler";
+import { Link } from "react-router";
 
 export default function DashboardHeader({ userInfo }: { userInfo: any }) {
       console.log(userInfo)
@@ -51,12 +52,14 @@ export default function DashboardHeader({ userInfo }: { userInfo: any }) {
                               <span className="pr-1 text-sm font-semibold text-foreground">+6</span>
 
                               {/* Invite Button */}
-                              <button className="flex h-9 items-center gap-2 rounded-full bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200">
+                              <Link to="/admin/invite">
+                                   <button className="flex cursor-pointer h-9 items-center gap-2 rounded-full bg-zinc-900 px-4 text-sm font-medium text-white transition-colors hover:bg-zinc-800 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200">
                                     <div className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 dark:bg-black/10">
                                           <UserPlus className="h-3 w-3" />
                                     </div>
                                     Invite
                               </button>
+                              </Link>
                         </div>
 
                         {/* Your original User Profile Menu */}
