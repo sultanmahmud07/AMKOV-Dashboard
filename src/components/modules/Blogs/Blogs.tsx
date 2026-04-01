@@ -20,7 +20,7 @@ const Blogs: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(6);
   const [searchTerm, setSearchTerm] = useState("");
-  const [sortOrder, setSortOrder] = useState("");
+  const [sortOrder] = useState("");
 
   const { data, isLoading } = useGetAllBlogsQuery({ page: currentPage, limit, searchTerm, sort: sortOrder });
 
