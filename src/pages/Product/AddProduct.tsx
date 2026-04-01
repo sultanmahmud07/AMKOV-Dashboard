@@ -1,9 +1,8 @@
+import CreateProduct from "@/components/modules/Product/CreateProduct"
 
 const AddProduct = () => {
   return (
-    <div>
-      Add Product
-    </div>
+    <CreateProduct />
   )
 }
 
