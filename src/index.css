@@ -127,6 +127,9 @@
 /* .active{
   color: var(--primary);
 } */
+ /* .ql-container {
+    min-height: 400px !important;
+} */
 
 .achieve_top_section {
   background-color: var(--popover);

@@ -25,11 +25,11 @@ const BlogDetails = () => {
 
         <Link
           to={`/news/edit/${blog?._id}`}
-          // className="text-white py-3 px-10 bg-primary font-bold rounded-lg"
-        
+        // className="text-white py-3 px-10 bg-primary font-bold rounded-lg"
+
         >
           <Button variant="outline">
-          Edit News
+            Edit News
           </Button>
         </Link>
       </div>
@@ -50,23 +50,35 @@ const BlogDetails = () => {
       )}
 
       {/* Blog Content */}
-      <div
-        className="content"
+      {/* <div
+        className="content w-full overflow-hidden break-words [&_img]:max-w-full [&_img]:h-auto [&_iframe]:max-w-full"
         dangerouslySetInnerHTML={{ __html: blog?.content || "" }}
-      ></div>
+      ></div> */}
 
       {/* Tags & Date */}
       <div className="mt-6 flex flex-wrap justify-between items-center text-sm text-gray-500 border-t pt-3">
         <div>
           <strong>Tags:</strong>{" "}
           {blog?.tags?.length ? (
-            blog.tags.map((tag: string, i:number) => (
+            blog.tags.map((tag: string, i: number) => (
               <span key={i} className="mr-2 text-primary">
                 #{tag}
               </span>
             ))
           ) : (
             <span>No tags</span>
+          )}
+        </div>
+        <div>
+          <strong>Keywords:</strong>{" "}
+          {blog?.keywords?.length ? (
+            blog.keywords.map((keyword: string, i: number) => (
+              <span key={i} className="mr-2 text-primary">
+                #{keyword}
+              </span>
+            ))
+          ) : (
+            <span>No keywords</span>
           )}
         </div>
 
