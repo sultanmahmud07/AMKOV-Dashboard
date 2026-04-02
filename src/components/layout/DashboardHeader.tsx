@@ -5,9 +5,10 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Bell, Search, UserPlus } from "lucide-react";
 import { ModeToggle } from "./ModeToggler";
 import { Link } from "react-router";
+import { useGetAllAdminQuery } from "@/redux/features/user/user.api";
 
-export default function DashboardHeader({ userInfo }: { userInfo: any }) {
-      console.log(userInfo)
+export default function DashboardHeader() {
+        const { data } = useGetAllAdminQuery({});
       return (
             <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b px-6 bg-background">
                   {/* Left Side: Search Bar & Filter */}
@@ -49,7 +50,7 @@ export default function DashboardHeader({ userInfo }: { userInfo: any }) {
                                     <img src="https://i.pravatar.cc/150?img=5" alt="User" className="h-8 w-8 rounded-full border-2 border-background object-cover" />
                                     <img src="https://i.pravatar.cc/150?img=12" alt="User" className="h-8 w-8 rounded-full border-2 border-background object-cover" />
                               </div>
-                              <span className="pr-1 text-sm font-semibold text-foreground">+6</span>
+                              <span className="pr-1 text-sm font-semibold text-foreground">+{data?.data?.length || 0}</span>
 
                               {/* Invite Button */}
                               <Link to="/admin/invite">
