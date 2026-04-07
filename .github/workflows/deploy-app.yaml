@@ -18,7 +18,12 @@ jobs:
 
       - name: Install Dependencies
         run: npm install --frozen-lockfile
-
+      # ✅ CRITICAL FIX: Create the .env file BEFORE running the build!
+      - name: Create .env file for Vite
+        run: |
+          cat << 'EOF' > .env
+          ${{ secrets.DASHBOARD_ENVS }}
+          EOF
       - name: Build React Project
         run: npm run build
 
@@ -43,10 +48,6 @@ jobs:
           # 1. Create a specific directory for the React dashboard
           ssh -i ~/.ssh/id_rsa $EC2_USER@$EC2_HOST "mkdir -p ~/amkov-dashboard"
 
-          # 2. Create the .env file locally from GitHub Secrets
-          cat << 'EOF' > .env
-          ${{ secrets.DASHBOARD_ENVS }}
-          EOF
 
           # 3. Copy files to EC2 instance
           rsync -avz -e "ssh -i ~/.ssh/id_rsa" \
