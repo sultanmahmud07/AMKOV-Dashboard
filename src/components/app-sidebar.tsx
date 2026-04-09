@@ -15,10 +15,19 @@ import logoLight from "../assets/images/logo/logo-light.png";
 import logoDark from "../assets/images/logo/logo-dark.png";
 import { Link, NavLink } from "react-router";
 import { getSidebarItems } from "@/utils/getSidebarItems";
-import { useUserInfoQuery } from "@/redux/features/auth/auth.api";
+import { authApi, useLogoutMutation, useUserInfoQuery } from "@/redux/features/auth/auth.api";
+import { FiLogOut } from "react-icons/fi";
+import { useAppDispatch } from "@/redux/hook";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { data: userData } = useUserInfoQuery(undefined);
+  const [logout] = useLogoutMutation();
+  const dispatch = useAppDispatch();
+
+  const handleSignOut = async () => {
+    await logout(undefined);
+    dispatch(authApi.util.resetApiState());
+  };
 
   const data = {
     navMain: getSidebarItems(userData?.data?.role),
@@ -84,8 +93,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                 {subItem.icon && (
                                   <span
                                     className={`w-5 h-5 transition-transform duration-300 flex items-center justify-center ${isActive
-                                        ? "scale-110"
-                                        : "group-hover:scale-110 group-hover:-rotate-3"
+                                      ? "scale-110"
+                                      : "group-hover:scale-110 group-hover:-rotate-3"
                                       }`}
                                   >
                                     <subItem.icon />
@@ -99,8 +108,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                               {/* A chevron that fades and slides in when active */}
                               <div
                                 className={`flex items-center justify-center transition-all duration-400 ease-out ${isActive
-                                    ? "opacity-100 translate-x-0"
-                                    : "opacity-0 -translate-x-3"
+                                  ? "opacity-100 translate-x-0"
+                                  : "opacity-0 -translate-x-3"
                                   }`}
                               >
                                 {/* If you are using Lucide React, import { ChevronRight } */}
@@ -131,7 +140,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarGroup>
         ))}
       </SidebarContent>
-
+      {/* --- 5. LOGOUT --- */}
+      <div className="border-t border-gray-100 dark:border-gray-700 mt-1 pt-1">
+        <button
+          onClick={handleSignOut}
+          className="w-full cursor-pointer text-left flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-gray-50 hover:text-bold dark:bg-zinc-900 hover:text-red-600 transition-colors"
+          role="menuitem"
+          type="button"
+        >
+          <FiLogOut className="w-4 h-4" />
+          Logout
+        </button>
+      </div>
       <SidebarRail />
     </Sidebar>
   );
