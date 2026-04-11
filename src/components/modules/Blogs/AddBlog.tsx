@@ -189,7 +189,7 @@ const AddBlog = ({ className }: React.HTMLAttributes<HTMLDivElement>) => {
         navigate("/news");
       }
     } catch (err) {
-      console.error(err);
+      console.log(err);
       const error = err as IApiError;
       toast.error(error?.data?.message || "Failed to publish blog");
       if (error?.data?.errorSources) {

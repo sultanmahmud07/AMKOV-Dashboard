@@ -101,7 +101,7 @@ const CreateProduct = () => {
         navigate("/products");
       }
     } catch (err) {
-      console.error(err);
+      console.log(err);
       const error = err as IApiError;
       toast.error(error?.data?.message || "Failed to create product");
       if (error?.data?.errorSources) {
