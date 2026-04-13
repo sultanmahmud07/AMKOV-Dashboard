@@ -18,10 +18,10 @@ import ResetPassword from "@/pages/ResetPassword";
 import CategoryDetailPage from "@/pages/Category/CategoryDetails";
 import EditCategory from "@/pages/Category/EditCategory";
 import AddCategory from "@/pages/Category/AddCategory";
-import EditProduct from "@/pages/Product/EditProduct";
 import ProductDetails from "@/pages/Product/ProductDetails";
 import AddAdmin from "@/components/modules/Admin/AddAdmin";
 import ContactDetails from "@/components/modules/Contact/ContactDetails";
+import UpdateProduct from "@/pages/Product/EditProduct";
 
 export const router = createBrowserRouter([
   {
@@ -67,7 +67,7 @@ export const router = createBrowserRouter([
       },
       {
         path: "/product/edit/:slug",
-        Component: EditProduct,
+        Component: UpdateProduct,
       },
       {
         path: "/user/:id",

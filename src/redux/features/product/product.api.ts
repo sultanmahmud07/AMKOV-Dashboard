@@ -10,9 +10,9 @@ export const productApi = baseApi.injectEndpoints({
                   }),
                   invalidatesTags: ["PRODUCT"],
             }),
-            updateProductByAdmin: builder.mutation({
+            updateProduct: builder.mutation({
                   query: ({ productId, productInfo }) => ({
-                        url: `/product/status/${productId}`,
+                        url: `/product/${productId}`,
                         method: "PATCH",
                         data: productInfo, 
                   }),
@@ -70,7 +70,7 @@ export const productApi = baseApi.injectEndpoints({
 
 export const {
       useAddProductMutation,
-      useUpdateProductByAdminMutation,
+      useUpdateProductMutation,
       useBlockProductByAdminMutation,
       useCancelProductMutation,
       useRemoveProductMutation,

@@ -1,10 +1,9 @@
+import EditProduct from "@/components/modules/Product/EditProduct"
 
-const EditProduct = () => {
+const UpdateProduct = () => {
   return (
-    <div>
-      
-    </div>
+    <EditProduct />
   )
 }
 
-export default EditProduct
+export default UpdateProduct

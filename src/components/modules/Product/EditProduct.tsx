@@ -1,0 +1,584 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router";
+import { useForm, useFieldArray, Controller, SubmitHandler } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { toast } from "sonner";
+import { Plus, Trash2, UploadCloud, X, Video, Loader2 } from "lucide-react";
+
+// Assuming you have these hooks in your product.api slice
+import { useGetProductDetailsQuery, useUpdateProductMutation } from "@/redux/features/product/product.api";
+import { IApiError } from "@/types";
+
+// UI Components
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { useGetAllCategoriesQuery } from "@/redux/features/category/category.api";
+import "react-quill-new/dist/quill.snow.css";
+import TextEditor from "./TextEditor";
+
+// 1. Zod Schema
+const productSchema = z.object({
+      name: z.string().min(1, "Product name is required"),
+      slug: z.string().min(1, "Slug is required"),
+      basePrice: z.coerce.number().min(0.01, "Price must be greater than 0"),
+      description: z.string().optional(),
+      category: z.string().optional(),
+
+      metaTitle: z.string().optional(),
+      metaDescription: z.string().optional(),
+      isMenu: z.boolean().default(false),
+      isTrendy: z.boolean().default(false),
+
+      bulletPoints: z.array(z.object({ value: z.string().min(1, "Cannot be empty") })).optional(),
+      specifications: z.array(
+            z.object({
+                  name: z.string().min(1, "Name required"),
+                  value: z.string().min(1, "Value required"),
+            })
+      ).optional(),
+      variations: z.array(
+            z.object({
+                  color: z.string().optional(),
+                  size: z.string().optional(),
+                  stock: z.coerce.number().min(0, "Stock cannot be negative"),
+                  price: z.coerce.number().optional(),
+            })
+      ).min(1, "At least one variation is required"),
+});
+
+type ProductFormValues = z.infer<typeof productSchema>;
+
+const EditProduct = () => {
+      const navigate = useNavigate();
+      const { slug } = useParams(); // Get slug from URL
+
+      // API Hooks
+      const { data: productResponse, isLoading: isFetching } = useGetProductDetailsQuery(slug);
+      const [updateProduct, { isLoading: isSubmitting }] = useUpdateProductMutation();
+      const { data: categoryData, isLoading: isLoadingCategories } = useGetAllCategoriesQuery(undefined);
+
+      const categories = categoryData?.data || [];
+      const existingProduct = productResponse?.data;
+
+      // File States (New uploads)
+      const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+      const [featureFiles, setFeatureFiles] = useState<File[]>([]);
+      const [videoFile, setVideoFile] = useState<File | null>(null);
+
+      // Existing Media Previews (URLs from backend)
+      const [existingGalleryUrls, setExistingGalleryUrls] = useState<string[]>([]);
+      const [existingFeatureUrls, setExistingFeatureUrls] = useState<string[]>([]);
+      const [existingVideoUrl, setExistingVideoUrl] = useState<string | null>(null);
+
+      // Track which existing images the user wants to delete
+      const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+
+      // 3. Initialize Form
+      const {
+            register,
+            control,
+            handleSubmit,
+            reset,
+            formState: { errors },
+      } = useForm<ProductFormValues>({
+            resolver: zodResolver(productSchema) as any,
+            defaultValues: {
+                  name: "",
+                  slug: "",
+                  basePrice: 0,
+                  description: "",
+                  category: "",
+                  metaTitle: "",
+                  metaDescription: "",
+                  isMenu: false,
+                  isTrendy: false,
+                  bulletPoints: [{ value: "" }],
+                  specifications: [{ name: "", value: "" }],
+                  variations: [{ color: "", stock: 0, price: 0 }],
+            },
+      });
+
+      // Dynamic Array Handlers
+      const { fields: variationFields, append: appendVariation, remove: removeVariation } = useFieldArray({ control, name: "variations" });
+      const { fields: specFields, append: appendSpec, remove: removeSpec } = useFieldArray({ control, name: "specifications" });
+      const { fields: bulletFields, append: appendBullet, remove: removeBullet } = useFieldArray({ control, name: "bulletPoints" });
+
+      // Populate form when data loads
+      useEffect(() => {
+            if (existingProduct) {
+                  reset({
+                        name: existingProduct.name || "",
+                        slug: existingProduct.slug || "",
+                        basePrice: existingProduct.basePrice || 0,
+                        description: existingProduct.description || "",
+                        category: existingProduct?.category?._id || existingProduct.category || "",
+                        metaTitle: existingProduct.metaTitle || "",
+                        metaDescription: existingProduct.metaDescription || "",
+                        isMenu: existingProduct.isMenu ?? false,
+                        isTrendy: existingProduct.isTrendy ?? false,
+                        bulletPoints: existingProduct.bulletPoints?.length
+                              ? existingProduct.bulletPoints.map((bp: string) => ({ value: bp }))
+                              : [{ value: "" }],
+                        specifications: existingProduct.specifications?.length
+                              ? existingProduct.specifications
+                              : [{ name: "", value: "" }],
+                        variations: existingProduct.variations?.length
+                              ? existingProduct.variations
+                              : [{ color: "", size: "", stock: 0, price: 0 }],
+                  });
+
+                  // Populate existing media
+                  if (existingProduct.images) setExistingGalleryUrls(existingProduct.images);
+                  if (existingProduct.featureImages) setExistingFeatureUrls(existingProduct.featureImages);
+                  if (existingProduct.video) setExistingVideoUrl(existingProduct.video);
+            }
+      }, [existingProduct, reset]);
+
+
+      // 4. Form Submission
+      const onSubmit: SubmitHandler<ProductFormValues> = async (data) => {
+            const formattedData = {
+                  ...data,
+                  bulletPoints: data.bulletPoints?.map((bp) => bp.value) || [],
+                  deleteImages: imagesToDelete, // Tell backend which old images to remove
+            };
+            // Remove category if it wasn't re-selected OR if it's empty
+            if (!formattedData.category) {
+                  delete formattedData.category;
+            }
+            const formData = new FormData();
+            formData.append("data", JSON.stringify(formattedData));
+
+            // Append new files
+            galleryFiles.forEach((file) => formData.append("images", file));
+            featureFiles.forEach((file) => formData.append("featureImages", file));
+            if (videoFile) {
+                  formData.append("video", videoFile);
+            }
+
+            try {
+                  const res = await updateProduct({ productId: existingProduct._id, productInfo: formData }).unwrap();
+                  if (res.success) {
+                        toast.success("Product updated successfully");
+                        // navigate("/products");
+                  }
+            } catch (err) {
+                  console.log(err);
+                  const error = err as IApiError;
+                  toast.error(error?.data?.message || "Failed to update product");
+                  if (error?.data?.errorSources) {
+                        error?.data?.errorSources.forEach((er: any) => toast.error(er.message));
+                  }
+            }
+      };
+
+      // --- Handlers for NEW files ---
+      const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+            if (e.target.files) setGalleryFiles((prev) => [...prev, ...Array.from(e.target.files as FileList)]);
+            e.target.value = "";
+      };
+      const removeGalleryFile = (index: number) => setGalleryFiles((prev) => prev.filter((_, i) => i !== index));
+
+      const handleFeatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+            if (e.target.files) setFeatureFiles((prev) => [...prev, ...Array.from(e.target.files as FileList)]);
+            e.target.value = "";
+      };
+      const removeFeatureFile = (index: number) => setFeatureFiles((prev) => prev.filter((_, i) => i !== index));
+
+      const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+            if (e.target.files && e.target.files[0]) setVideoFile(e.target.files[0]);
+            e.target.value = "";
+      };
+      const removeVideoFile = () => setVideoFile(null);
+
+      // --- Handlers for EXISTING files ---
+      const removeExistingGalleryImage = (urlToRemove: string) => {
+            setExistingGalleryUrls((prev) => prev.filter((url) => url !== urlToRemove));
+            setImagesToDelete((prev) => [...prev, urlToRemove]);
+      };
+
+      const removeExistingFeatureImage = (urlToRemove: string) => {
+            setExistingFeatureUrls((prev) => prev.filter((url) => url !== urlToRemove));
+            setImagesToDelete((prev) => [...prev, urlToRemove]);
+      };
+
+      const removeExistingVideo = () => {
+            setExistingVideoUrl(null);
+            setImagesToDelete((prev) => [...prev, existingVideoUrl as string]);
+      };
+
+
+      if (isFetching) {
+            return (
+                  <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
+                        <Loader2 className="w-8 h-8 animate-spin text-[#1BAE70]" />
+                        <p className="text-gray-500 font-medium">Loading product details...</p>
+                  </div>
+            );
+      }
+
+      return (
+            <div className="w-full p-4 md:p-8 md:pt-3">
+                  <div className="mb-5">
+                        <h1 className="text-3xl font-bold">Edit Product</h1>
+                        <p className="text-gray-500">Update information for {existingProduct?.name}</p>
+                  </div>
+
+                  <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+
+                        {/* Basic Information */}
+                        <Card>
+                              <CardHeader>
+                                    <CardTitle>Basic Information</CardTitle>
+                              </CardHeader>
+                              <CardContent className="grid grid-cols-1 gap-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                          <div className="space-y-2">
+                                                <Label>Product Name</Label>
+                                                <Input placeholder="AMKOV 5K V-Log Camera..." {...register("name")} />
+                                                {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
+                                          </div>
+                                          <div className="space-y-2">
+                                                <Label>Base Price ($)</Label>
+                                                <Input type="number" step="0.01" {...register("basePrice")} />
+                                                {errors.basePrice && <p className="text-red-500 text-sm">{errors.basePrice.message}</p>}
+                                          </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                          <Controller
+                                                name="description"
+                                                control={control}
+                                                render={({ field }) => (
+                                                      <TextEditor
+                                                            label="Product Description (HTML allowed)"
+                                                            value={field.value || ""}
+                                                            onChange={field.onChange}
+                                                      />
+                                                )}
+                                          />
+                                    </div>
+                              </CardContent>
+                        </Card>
+
+                        {/* ================= Organization & SEO Card ================= */}
+                        <Card>
+                              <CardHeader>
+                                    <CardTitle>Organization & SEO</CardTitle>
+                              </CardHeader>
+                              <CardContent className="space-y-6">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                          {/* Category */}
+                                          <div className="space-y-2">
+                                                <Label>Category</Label>
+                                                <Controller
+                                                      control={control}
+                                                      name="category"
+                                                      render={({ field }) => (
+                                                            <Select onValueChange={field.onChange} value={field.value} disabled={isLoadingCategories}>
+                                                                  <SelectTrigger>
+                                                                        <SelectValue placeholder={isLoadingCategories ? "Loading categories..." : "Select a category"} />
+                                                                  </SelectTrigger>
+                                                                  <SelectContent>
+                                                                        {categories.map((category: any) => (
+                                                                              <SelectItem key={category._id} value={category._id}>
+                                                                                    {category.name}
+                                                                              </SelectItem>
+                                                                        ))}
+                                                                  </SelectContent>
+                                                            </Select>
+                                                      )}
+                                                />
+                                                {errors.category && <p className="text-red-500 text-sm">{errors.category.message}</p>}
+                                          </div>
+
+                                          {/* Slug */}
+                                          <div className="space-y-2">
+                                                <Label>URL Slug</Label>
+                                                <Input placeholder="amkov-5k-vlog-camera" {...register("slug")} />
+                                                <p className="text-xs text-gray-500">Auto-generated from name. You can manually edit this.</p>
+                                                {errors.slug && <p className="text-red-500 text-sm">{errors.slug.message}</p>}
+                                          </div>
+
+                                          {/* Meta Title */}
+                                          <div className="space-y-2">
+                                                <Label>Meta Title</Label>
+                                                <Input placeholder="SEO Title for search engines" {...register("metaTitle")} />
+                                          </div>
+                                    </div>
+
+                                    {/* Meta Description */}
+                                    <div className="space-y-2">
+                                          <Label>Meta Description</Label>
+                                          <Textarea
+                                                placeholder="Brief description for search engine results..."
+                                                className="resize-none h-20"
+                                                {...register("metaDescription")}
+                                          />
+                                    </div>
+
+                                    {/* Display Switches */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+                                          <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
+                                                <div className="space-y-0.5">
+                                                      <Label className="text-base">Show in Menu</Label>
+                                                      <p className="text-xs text-gray-500">Display this product in the main navigation.</p>
+                                                </div>
+                                                <Controller
+                                                      control={control}
+                                                      name="isMenu"
+                                                      render={({ field }) => (
+                                                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                                                      )}
+                                                />
+                                          </div>
+
+                                          <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
+                                                <div className="space-y-0.5">
+                                                      <Label className="text-base">Mark as Trendy</Label>
+                                                      <p className="text-xs text-gray-500">Highlight this product in trending sections.</p>
+                                                </div>
+                                                <Controller
+                                                      control={control}
+                                                      name="isTrendy"
+                                                      render={({ field }) => (
+                                                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                                                      )}
+                                                />
+                                          </div>
+                                    </div>
+                              </CardContent>
+                        </Card>
+
+                        {/* Variations */}
+                        <Card>
+                              <CardHeader className="flex flex-row justify-between items-center">
+                                    <CardTitle>Inventory & Variations</CardTitle>
+                                    <Button type="button" variant="outline" size="sm" onClick={() => appendVariation({ color: "", size: "", stock: 0, price: 0 })}>
+                                          <Plus className="w-4 h-4 mr-2" /> Add Variation
+                                    </Button>
+                              </CardHeader>
+                              <CardContent className="space-y-4">
+                                    {variationFields.map((field, index) => (
+                                          <div key={field.id} className="flex flex-wrap items-end gap-4 p-4 border rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
+                                                <div className="space-y-2 flex-1 min-w-[150px]">
+                                                      <Label>Color</Label>
+                                                      <Input placeholder="Matte Black" {...register(`variations.${index}.color` as const)} />
+                                                </div>
+                                                <div className="space-y-2 flex-1 min-w-[150px]">
+                                                      <Label>Size</Label>
+                                                      <Input placeholder="XL (optional)" {...register(`variations.${index}.size` as const)} />
+                                                </div>
+                                                <div className="space-y-2 w-24">
+                                                      <Label>Stock</Label>
+                                                      <Input type="number" {...register(`variations.${index}.stock` as const)} />
+                                                </div>
+                                                <div className="space-y-2 w-32">
+                                                      <Label>Extra Price (+)</Label>
+                                                      <Input type="number" step="0.01" placeholder="0.00" {...register(`variations.${index}.price` as const)} />
+                                                </div>
+                                                <Button type="button" variant="destructive" size="icon" onClick={() => removeVariation(index)} disabled={variationFields.length === 1}>
+                                                      <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                          </div>
+                                    ))}
+                                    {errors.variations && <p className="text-red-500 text-sm">{errors.variations.message}</p>}
+                              </CardContent>
+                        </Card>
+
+                        {/* Specs and Bullets Grid */}
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                              <Card>
+                                    <CardHeader className="flex flex-row justify-between items-center">
+                                          <CardTitle>Specifications</CardTitle>
+                                          <Button type="button" variant="ghost" size="sm" onClick={() => appendSpec({ name: "", value: "" })}>
+                                                <Plus className="w-4 h-4 mr-1" /> Add
+                                          </Button>
+                                    </CardHeader>
+                                    <CardContent className="space-y-3">
+                                          {specFields.map((field, index) => (
+                                                <div key={field.id} className="flex items-center gap-3">
+                                                      <Input placeholder="Sensor Type" {...register(`specifications.${index}.name` as const)} />
+                                                      <Input placeholder="CMOS" {...register(`specifications.${index}.value` as const)} />
+                                                      <Button type="button" variant="ghost" size="icon" onClick={() => removeSpec(index)}>
+                                                            <Trash2 className="w-4 h-4 text-red-500" />
+                                                      </Button>
+                                                </div>
+                                          ))}
+                                    </CardContent>
+                              </Card>
+                              <Card>
+                                    <CardHeader className="flex flex-row justify-between items-center">
+                                          <CardTitle>Bullet Points</CardTitle>
+                                          <Button type="button" variant="ghost" size="sm" onClick={() => appendBullet({ value: "" })}>
+                                                <Plus className="w-4 h-4 mr-1" /> Add
+                                          </Button>
+                                    </CardHeader>
+                                    <CardContent className="space-y-3">
+                                          {bulletFields.map((field, index) => (
+                                                <div key={field.id} className="flex items-center gap-3">
+                                                      <Input placeholder="5K Ultra HD video resolution..." {...register(`bulletPoints.${index}.value` as const)} />
+                                                      <Button type="button" variant="ghost" size="icon" onClick={() => removeBullet(index)}>
+                                                            <Trash2 className="w-4 h-4 text-red-500" />
+                                                      </Button>
+                                                </div>
+                                          ))}
+                                    </CardContent>
+                              </Card>
+                        </div>
+
+                        {/* ================= MEDIA UPLOADS ================= */}
+                        <Card>
+                              <CardHeader>
+                                    <CardTitle>Media Files</CardTitle>
+                              </CardHeader>
+                              <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                                    {/* Gallery Images */}
+                                    <div className="space-y-4">
+                                          <Label>Gallery Images</Label>
+                                          <div className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 hover:dark:bg-gray-800 transition-colors relative">
+                                                <input
+                                                      type="file"
+                                                      multiple
+                                                      accept="image/*"
+                                                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                      onChange={handleGalleryChange}
+                                                />
+                                                <UploadCloud className="w-8 h-8 text-gray-400 mb-2" />
+                                                <p className="text-sm font-medium">Click to Add New Gallery Images</p>
+                                          </div>
+
+                                          {(existingGalleryUrls.length > 0 || galleryFiles.length > 0) && (
+                                                <div className="flex flex-wrap gap-2 mt-2 p-3 border rounded-lg bg-gray-50/50">
+
+                                                      {/* Show Existing Gallery Images */}
+                                                      {existingGalleryUrls.map((url, index) => (
+                                                            <div key={`exist-gal-${index}`} className="relative w-20 h-20 group rounded-md overflow-hidden border border-blue-200">
+                                                                  <img src={url} alt={`gallery-exist-${index}`} className="w-full h-full object-cover opacity-80" />
+                                                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                                        <button type="button" onClick={() => removeExistingGalleryImage(url)} className="bg-red-500 text-white rounded-full p-1.5 shadow-sm">
+                                                                              <Trash2 className="w-4 h-4" />
+                                                                        </button>
+                                                                  </div>
+                                                            </div>
+                                                      ))}
+
+                                                      {/* Show New Gallery Previews */}
+                                                      {galleryFiles.map((file, index) => (
+                                                            <div key={`new-gal-${index}`} className="relative w-20 h-20 group rounded-md overflow-hidden border border-green-200">
+                                                                  <img src={URL.createObjectURL(file)} alt={`gallery-preview-${index}`} className="w-full h-full object-cover" />
+                                                                  <button type="button" onClick={() => removeGalleryFile(index)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                        <X className="w-3 h-3" />
+                                                                  </button>
+                                                            </div>
+                                                      ))}
+                                                </div>
+                                          )}
+                                    </div>
+
+                                    {/* Feature Banner Images */}
+                                    <div className="space-y-4">
+                                          <Label>Feature Banner Images</Label>
+                                          <div className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 hover:dark:bg-gray-800 transition-colors relative">
+                                                <input
+                                                      type="file"
+                                                      multiple
+                                                      accept="image/*"
+                                                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                      onChange={handleFeatureChange}
+                                                />
+                                                <UploadCloud className="w-8 h-8 text-gray-400 mb-2" />
+                                                <p className="text-sm font-medium">Click to Add New Feature Images</p>
+                                          </div>
+
+                                          {(existingFeatureUrls.length > 0 || featureFiles.length > 0) && (
+                                                <div className="flex flex-wrap gap-2 mt-2 p-3 border rounded-lg bg-gray-50/50">
+
+                                                      {/* Show Existing Feature Images */}
+                                                      {existingFeatureUrls.map((url, index) => (
+                                                            <div key={`exist-feat-${index}`} className="relative w-32 h-20 group rounded-md overflow-hidden border border-blue-200">
+                                                                  <img src={url} alt={`feature-exist-${index}`} className="w-full h-full object-cover opacity-80" />
+                                                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                                        <button type="button" onClick={() => removeExistingFeatureImage(url)} className="bg-red-500 text-white rounded-full p-1.5 shadow-sm">
+                                                                              <Trash2 className="w-4 h-4" />
+                                                                        </button>
+                                                                  </div>
+                                                            </div>
+                                                      ))}
+
+                                                      {/* Show New Feature Previews */}
+                                                      {featureFiles.map((file, index) => (
+                                                            <div key={`new-feat-${index}`} className="relative w-32 h-20 group rounded-md overflow-hidden border border-green-200">
+                                                                  <img src={URL.createObjectURL(file)} alt={`feature-preview-${index}`} className="w-full h-full object-cover" />
+                                                                  <button type="button" onClick={() => removeFeatureFile(index)} className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                                        <X className="w-3 h-3" />
+                                                                  </button>
+                                                            </div>
+                                                      ))}
+                                                </div>
+                                          )}
+                                    </div>
+
+                                    {/* Video Upload */}
+                                    <div className="space-y-4 md:col-span-2">
+                                          <Label>Product Video</Label>
+                                          <div className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 hover:dark:bg-gray-800 transition-colors relative">
+                                                <input
+                                                      type="file"
+                                                      accept="video/*"
+                                                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                      onChange={handleVideoChange}
+                                                />
+                                                <Video className="w-8 h-8 text-gray-400 mb-2" />
+                                                <p className="text-sm font-medium">Click to Add/Replace Product Video</p>
+                                                <p className="text-xs text-gray-500 mt-1">MP4, WebM or OGG formats</p>
+                                          </div>
+
+                                          {/* Show Existing Video OR New Video Preview */}
+                                          {videoFile ? (
+                                                <div className="relative w-full max-w-sm aspect-video group rounded-md overflow-hidden border border-green-200 bg-black mt-2">
+                                                      <video src={URL.createObjectURL(videoFile)} className="w-full h-full object-contain" controls />
+                                                      <button type="button" onClick={removeVideoFile} className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20 shadow-md">
+                                                            <X className="w-4 h-4" />
+                                                      </button>
+                                                </div>
+                                          ) : existingVideoUrl ? (
+                                                <div className="relative w-full max-w-sm aspect-video group rounded-md overflow-hidden border border-blue-200 bg-black mt-2">
+                                                      <video src={existingVideoUrl} className="w-full h-full object-contain" controls />
+                                                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center z-10">
+                                                            <Button type="button" variant="destructive" onClick={removeExistingVideo}>
+                                                                  <Trash2 className="w-4 h-4 mr-2" /> Remove Video
+                                                            </Button>
+                                                      </div>
+                                                </div>
+                                          ) : null}
+
+                                    </div>
+
+                              </CardContent>
+                        </Card>
+
+                        {/* Form Actions */}
+                        <div className="flex justify-end gap-4 pt-4">
+                              <Button type="button" variant="outline" onClick={() => navigate("/admin/products")}>
+                                    Cancel
+                              </Button>
+                              <Button type="submit" disabled={isSubmitting}>
+                                    {isSubmitting ? "Updating..." : "Update Product"}
+                              </Button>
+                        </div>
+
+                  </form>
+            </div>
+      );
+};
+
+export default EditProduct;

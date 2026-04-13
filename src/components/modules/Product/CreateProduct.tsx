@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
-import { Plus, Trash2, UploadCloud, X } from "lucide-react";
+import { Plus, Trash2, UploadCloud, X, Video } from "lucide-react"; // Added Video icon
 
 import { useAddProductMutation } from "@/redux/features/product/product.api";
 import { IApiError } from "@/types";
@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch"; // Added Switch
+import { Textarea } from "@/components/ui/textarea"; // Added Textarea for Meta Description
 import { useGetAllCategoriesQuery } from "@/redux/features/category/category.api";
 import "react-quill-new/dist/quill.snow.css";
 import TextEditor from "./TextEditor";
@@ -27,6 +29,13 @@ const productSchema = z.object({
   basePrice: z.coerce.number().min(0.01, "Price must be greater than 0"),
   description: z.string().optional(),
   category: z.string().optional(),
+
+  // New Fields
+  metaTitle: z.string().optional(),
+  metaDescription: z.string().optional(),
+  isMenu: z.boolean().default(false),
+  isTrendy: z.boolean().default(false),
+
   bulletPoints: z.array(z.object({ value: z.string().min(1, "Cannot be empty") })).optional(),
   specifications: z.array(
     z.object({
@@ -51,28 +60,35 @@ const CreateProduct = () => {
   const [createProduct, { isLoading: isSubmitting }] = useAddProductMutation();
   const { data: categoryData, isLoading: isLoadingCategories } = useGetAllCategoriesQuery(undefined);
   const categories = categoryData?.data || [];
-  
+
   // 2. Separate State for Files
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [featureFiles, setFeatureFiles] = useState<File[]>([]);
+  const [videoFile, setVideoFile] = useState<File | null>(null); // New Video State
 
   // 3. Initialize Form
   const {
     register,
     control,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors },
-  } = useForm({
-    resolver: zodResolver(productSchema),
+  } = useForm<ProductFormValues>({
+    resolver: zodResolver(productSchema) as any,
     defaultValues: {
       name: "",
       slug: "",
       basePrice: 0,
       description: "",
       category: "",
+      metaTitle: "",
+      metaDescription: "",
+      isMenu: true,
+      isTrendy: true,
       bulletPoints: [{ value: "" }],
       specifications: [{ name: "", value: "" }],
-      variations: [{ color: "", stock: 0 }],
+      variations: [{ color: "", stock: 0, price: 0 }],
     },
   });
 
@@ -81,18 +97,35 @@ const CreateProduct = () => {
   const { fields: specFields, append: appendSpec, remove: removeSpec } = useFieldArray({ control, name: "specifications" });
   const { fields: bulletFields, append: appendBullet, remove: removeBullet } = useFieldArray({ control, name: "bulletPoints" });
 
+  // Auto-generate Slug from Name
+  const nameValue = watch("name");
+  useEffect(() => {
+    if (nameValue) {
+      const generatedSlug = nameValue
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)+/g, "");
+      setValue("slug", generatedSlug, { shouldValidate: true });
+    }
+  }, [nameValue, setValue]);
+
   // 4. Form Submission
   const onSubmit = async (data: ProductFormValues) => {
     const formattedData = {
       ...data,
       bulletPoints: data.bulletPoints?.map((bp) => bp.value) || [],
     };
-
+console.log("data:", formattedData)
     const formData = new FormData();
+    // Stringify text data (including the new boolean and meta fields)
     formData.append("data", JSON.stringify(formattedData));
 
+    // Append Files
     galleryFiles.forEach((file) => formData.append("images", file));
     featureFiles.forEach((file) => formData.append("featureImages", file));
+    if (videoFile) {
+      formData.append("video", videoFile); // Append Video if uploaded
+    }
 
     try {
       const res = await createProduct(formData).unwrap();
@@ -110,85 +143,60 @@ const CreateProduct = () => {
     }
   };
 
-  // --- NEW: Helper functions to handle file selection and removal safely ---
+  // File Handlers
   const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setGalleryFiles((prev) => [...prev, ...newFiles]); // Append new images instead of replacing
+      setGalleryFiles((prev) => [...prev, ...Array.from(e.target.files as FileList)]);
     }
-    // Reset the input so the same file can be selected again if needed
     e.target.value = "";
   };
-
-  const removeGalleryFile = (indexToRemove: number) => {
-    setGalleryFiles((prev) => prev.filter((_, index) => index !== indexToRemove));
-  };
+  const removeGalleryFile = (index: number) => setGalleryFiles((prev) => prev.filter((_, i) => i !== index));
 
   const handleFeatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setFeatureFiles((prev) => [...prev, ...newFiles]); // Append new images
+      setFeatureFiles((prev) => [...prev, ...Array.from(e.target.files as FileList)]);
     }
     e.target.value = "";
   };
+  const removeFeatureFile = (index: number) => setFeatureFiles((prev) => prev.filter((_, i) => i !== index));
 
-  const removeFeatureFile = (indexToRemove: number) => {
-    setFeatureFiles((prev) => prev.filter((_, index) => index !== indexToRemove));
+  const handleVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setVideoFile(e.target.files[0]);
+    }
+    e.target.value = "";
   };
+  const removeVideoFile = () => setVideoFile(null);
 
   return (
-    <div className="max-w-5xl mx-auto p-4 md:p-8 md:pt-3">
+    <div className="w-full p-4 md:p-8 md:pt-3">
       <div className="mb-5">
         <h1 className="text-3xl font-bold">Add New Product</h1>
         <p className="text-gray-500">Create a new product listing for your store.</p>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-        
+
         {/* Basic Information */}
         <Card>
           <CardHeader>
             <CardTitle>Basic Information</CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label>Product Name</Label>
-              <Input placeholder="AMKOV 5K V-Log Camera..." {...register("name")} />
-              {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
+          <CardContent className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label>Product Name</Label>
+                <Input placeholder="AMKOV 5K V-Log Camera..." {...register("name")} />
+                {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label>Base Price ($)</Label>
+                <Input type="number" step="0.01" {...register("basePrice")} />
+                {errors.basePrice && <p className="text-red-500 text-sm">{errors.basePrice.message}</p>}
+              </div>
             </div>
+
             <div className="space-y-2">
-              <Label>URL Slug</Label>
-              <Input placeholder="amkov-5k-vlog-camera" {...register("slug")} />
-              {errors.slug && <p className="text-red-500 text-sm">{errors.slug.message}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label>Base Price ($)</Label>
-              <Input type="number" step="0.01" {...register("basePrice")} />
-              {errors.basePrice && <p className="text-red-500 text-sm">{errors.basePrice.message}</p>}
-            </div>
-            <div className="space-y-2">
-              <Label>Category</Label>
-              <Controller
-                control={control}
-                name="category"
-                render={({ field }) => (
-                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingCategories}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={isLoadingCategories ? "Loading categories..." : "Select a category"} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category: any) => (
-                        <SelectItem key={category._id} value={category._id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-              {errors.category && <p className="text-red-500 text-sm">{errors.category.message}</p>}
-            </div>
-            <div className="space-y-2 md:col-span-2">
               <Controller
                 name="description"
                 control={control}
@@ -204,11 +212,100 @@ const CreateProduct = () => {
           </CardContent>
         </Card>
 
+        {/* ================= NEW: Organization & SEO Card ================= */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Organization & SEO</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Category */}
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Controller
+                  control={control}
+                  name="category"
+                  render={({ field }) => (
+                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingCategories}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={isLoadingCategories ? "Loading categories..." : "Select a category"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category: any) => (
+                          <SelectItem key={category._id} value={category._id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                {errors.category && <p className="text-red-500 text-sm">{errors.category.message}</p>}
+              </div>
+
+              {/* Slug */}
+              <div className="space-y-2">
+                <Label>URL Slug</Label>
+                <Input placeholder="amkov-5k-vlog-camera" {...register("slug")} />
+                <p className="text-xs text-gray-500">Auto-generated from name. You can manually edit this.</p>
+                {errors.slug && <p className="text-red-500 text-sm">{errors.slug.message}</p>}
+              </div>
+
+              {/* Meta Title */}
+              <div className="space-y-2">
+                <Label>Meta Title</Label>
+                <Input placeholder="SEO Title for search engines" {...register("metaTitle")} />
+              </div>
+            </div>
+
+            {/* Meta Description */}
+            <div className="space-y-2">
+              <Label>Meta Description</Label>
+              <Textarea
+                placeholder="Brief description for search engine results..."
+                className="resize-none h-20"
+                {...register("metaDescription")}
+              />
+            </div>
+
+            {/* Display Switches */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
+              <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
+                <div className="space-y-0.5">
+                  <Label className="text-base">Show in Menu</Label>
+                  <p className="text-xs text-gray-500">Display this product in the main navigation.</p>
+                </div>
+                <Controller
+                  control={control}
+                  name="isMenu"
+                  render={({ field }) => (
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  )}
+                />
+              </div>
+
+              <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50/50 dark:bg-gray-800/50">
+                <div className="space-y-0.5">
+                  <Label className="text-base">Mark as Trendy</Label>
+                  <p className="text-xs text-gray-500">Highlight this product in trending sections.</p>
+                </div>
+                <Controller
+                  control={control}
+                  name="isTrendy"
+                  render={({ field }) => (
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  )}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Variations */}
         <Card>
           <CardHeader className="flex flex-row justify-between items-center">
             <CardTitle>Inventory & Variations</CardTitle>
-            <Button type="button" variant="outline" size="sm" onClick={() => appendVariation({ color: "", size: "", stock: 0 })}>
+            <Button type="button" variant="outline" size="sm" onClick={() => appendVariation({ color: "", size: "", stock: 0, price: 0 })}>
               <Plus className="w-4 h-4 mr-2" /> Add Variation
             </Button>
           </CardHeader>
@@ -281,7 +378,7 @@ const CreateProduct = () => {
           </Card>
         </div>
 
-        {/* ================= MEDIA UPLOADS (UPDATED) ================= */}
+        {/* ================= MEDIA UPLOADS ================= */}
         <Card>
           <CardHeader>
             <CardTitle>Media Files</CardTitle>
@@ -304,7 +401,6 @@ const CreateProduct = () => {
                 <p className="text-xs text-gray-500 mt-1">{galleryFiles.length} files selected</p>
               </div>
 
-              {/* Preview Grid */}
               {galleryFiles.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
                   {galleryFiles.map((file, index) => (
@@ -343,7 +439,6 @@ const CreateProduct = () => {
                 <p className="text-xs text-gray-500 mt-1">{featureFiles.length} files selected</p>
               </div>
 
-              {/* Preview Grid */}
               {featureFiles.length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
                   {featureFiles.map((file, index) => (
@@ -366,12 +461,45 @@ const CreateProduct = () => {
               )}
             </div>
 
+            {/* NEW: Video Upload */}
+            <div className="space-y-4 md:col-span-2">
+              <Label>Product Video</Label>
+              <div className="border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 hover:dark:bg-gray-800 transition-colors relative">
+                <input
+                  type="file"
+                  accept="video/*"
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  onChange={handleVideoChange}
+                />
+                <Video className="w-8 h-8 text-gray-400 mb-2" />
+                <p className="text-sm font-medium">Click to Add Product Video</p>
+                <p className="text-xs text-gray-500 mt-1">{videoFile ? "1 video selected" : "MP4, WebM or OGG formats"}</p>
+              </div>
+
+              {videoFile && (
+                <div className="relative w-full max-w-sm aspect-video group rounded-md overflow-hidden border bg-black mt-2">
+                  <video
+                    src={URL.createObjectURL(videoFile)}
+                    className="w-full h-full object-contain"
+                    controls
+                  />
+                  <button
+                    type="button"
+                    onClick={removeVideoFile}
+                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity z-20 shadow-md"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
+
           </CardContent>
         </Card>
 
         {/* Form Actions */}
         <div className="flex justify-end gap-4 pt-4">
-          <Button type="button" variant="outline" onClick={() => navigate("/admin/products")}>
+          <Button type="button" variant="outline" onClick={() => navigate("/products")}>
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting}>
