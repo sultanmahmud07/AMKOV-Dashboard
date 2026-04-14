@@ -13,6 +13,7 @@ import {
   Camera,
   Newspaper,
   NotebookPen,
+  CloudUpload,
 } from "lucide-react";
 import AllContactList from "@/components/modules/Contact/ContactList";
 import Blogs from "@/components/modules/Blogs/Blogs";
@@ -22,6 +23,7 @@ import Products from "@/pages/Product/Products";
 import AddProduct from "@/pages/Product/AddProduct";
 import AllCategories from "@/pages/Category/AllCategories";
 import MyProfile from "@/pages/Profile/MyProfile";
+import Instructions from "@/components/modules/Instruction/Instructions";
 
 
 export const adminSidebarItems: ISidebarItem[] = [
@@ -68,6 +70,12 @@ export const adminSidebarItems: ISidebarItem[] = [
         url: "/new/create",
         component: AddBlog,
         icon: NotebookPen,
+      },
+      {
+        title: "Instructions PDF",
+        url: "/instructions",
+        component: Instructions,
+        icon: CloudUpload,
       },
     ],
   },
