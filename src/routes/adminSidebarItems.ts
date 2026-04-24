@@ -14,6 +14,7 @@ import {
   Newspaper,
   NotebookPen,
   CloudUpload,
+  MessageCircleQuestionMark,
 } from "lucide-react";
 import AllContactList from "@/components/modules/Contact/ContactList";
 import Blogs from "@/components/modules/Blogs/Blogs";
@@ -24,6 +25,7 @@ import AddProduct from "@/pages/Product/AddProduct";
 import AllCategories from "@/pages/Category/AllCategories";
 import MyProfile from "@/pages/Profile/MyProfile";
 import Instructions from "@/components/modules/Instruction/Instructions";
+import Support from "@/components/modules/Support/Support";
 
 
 export const adminSidebarItems: ISidebarItem[] = [
@@ -76,6 +78,12 @@ export const adminSidebarItems: ISidebarItem[] = [
         url: "/instructions",
         component: Instructions,
         icon: CloudUpload,
+      },
+      {
+        title: "Support",
+        url: "/support",
+        component: Support,
+        icon: MessageCircleQuestionMark,
       },
     ],
   },

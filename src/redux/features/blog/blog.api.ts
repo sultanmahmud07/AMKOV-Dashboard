@@ -10,7 +10,7 @@ export const blogApi = baseApi.injectEndpoints({
                   }),
                   invalidatesTags: ["BLOG"],
             }),
-            updateBlogByAdmin: builder.mutation({
+            updateBlog: builder.mutation({
                   query: ({ blogId, blogInfo }) => ({
                         url: `/blog/${blogId}`,
                         method: "PATCH",
@@ -46,7 +46,7 @@ export const blogApi = baseApi.injectEndpoints({
 
 export const {
       useAddBlogMutation,
-      useUpdateBlogByAdminMutation,
+      useUpdateBlogMutation,
       useRemoveBlogMutation,
       useGetBlogDetailsQuery,
       useGetAllBlogsQuery,

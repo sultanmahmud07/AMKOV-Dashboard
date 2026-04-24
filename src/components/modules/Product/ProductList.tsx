@@ -131,7 +131,11 @@ export default function ProductList() {
                                                             ? product.name.slice(0, 30) + "..."
                                                             : product.name}
                                                 </TableCell>
-                                                <TableCell className="text-gray-500 text-sm">{product.slug}</TableCell>
+                                                <TableCell className="text-gray-500 text-sm">
+                                                      {product.slug.length > 20
+                                                            ? product.slug.slice(0, 20) + "..."
+                                                            : product.slug}
+                                                </TableCell>
                                                 <TableCell className="font-semibold">${product.basePrice.toFixed(2)}</TableCell>
                                                 <TableCell>{formatDate(product.createdAt)}</TableCell>
                                                 <TableCell className="flex justify-end items-center gap-2">
