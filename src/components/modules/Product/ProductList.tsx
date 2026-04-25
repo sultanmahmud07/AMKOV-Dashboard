@@ -38,7 +38,7 @@ export default function ProductList() {
       const [currentPage, setCurrentPage] = useState(1);
       const [limit] = useState(10);
       const [searchTerm, setSearchTerm] = useState("");
-      const [sortOrder, setSortOrder] = useState("");
+      const [sortOrder, setSortOrder] = useState("orderBy"); // Default sort order
 
       const { data, isLoading } = useGetAllProductsQuery({ page: currentPage, limit, searchTerm, sort: sortOrder });
       const [removeProduct] = useRemoveProductMutation();
@@ -87,6 +87,7 @@ export default function ProductList() {
                               <SelectContent>
                                     <SelectGroup>
                                           <SelectLabel>Order By</SelectLabel>
+                                          <SelectItem value="orderBy">Custom Order</SelectItem>
                                           <SelectItem value="-createdAt">Newest First</SelectItem>
                                           <SelectItem value="createdAt">Oldest First</SelectItem>
                                           <SelectItem value="basePrice">Price: Low to High</SelectItem>
@@ -106,6 +107,7 @@ export default function ProductList() {
                                           <TableHead>Name</TableHead>
                                           <TableHead>Slug</TableHead>
                                           <TableHead>Base Price</TableHead>
+                                          <TableHead>Order By</TableHead>
                                           <TableHead>Date Added</TableHead>
                                           <TableHead className="text-right">Action</TableHead>
                                     </TableRow>
@@ -137,6 +139,7 @@ export default function ProductList() {
                                                             : product.slug}
                                                 </TableCell>
                                                 <TableCell className="font-semibold">${product.basePrice.toFixed(2)}</TableCell>
+                                                <TableCell className="font-semibold">{product.orderBy}</TableCell>
                                                 <TableCell>{formatDate(product.createdAt)}</TableCell>
                                                 <TableCell className="flex justify-end items-center gap-2">
                                                       <Link to={`/product/view/${product.slug}`}>

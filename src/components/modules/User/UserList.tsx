@@ -42,14 +42,14 @@ export default function AllUserList() {
   const [limit] = useState(10);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState("");
-  
+
   const { data, isLoading } = useGetAllUserQuery({
     page: currentPage,
     limit,
     searchTerm,
     sort: sortOrder,
   });
-  
+
   const [updateUserByAdmin] = useUpdateUserMutation();
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,7 +65,7 @@ export default function AllUserList() {
     const userInfo = {
       isDeleted: true,
     };
-    
+
     try {
       const res = await updateUserByAdmin({ userId, userInfo }).unwrap();
       if (res.success) {
@@ -83,7 +83,7 @@ export default function AllUserList() {
 
   return (
     <div className="w-full min-h-full bg-white dark:bg-zinc-950 p-5 md:p-8 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-800/50">
-      
+
       {/* Header & Controls */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div className="space-y-1">
@@ -151,29 +151,29 @@ export default function AllUserList() {
               ) : (
                 data?.data.map((user: IUser) => (
                   <TableRow key={user._id} className="hover:bg-gray-50/50 dark:hover:bg-zinc-900/50 transition-colors">
-                    
+
                     {/* Name */}
                     <TableCell className="font-bold text-gray-900 dark:text-white capitalize">
                       {user.name}
                     </TableCell>
-                    
+
                     {/* Email */}
                     <TableCell className="text-gray-500 dark:text-gray-400 font-medium">
                       {user.email}
                     </TableCell>
-                    
+
                     {/* Role Badge */}
                     <TableCell>
                       <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-400 border border-blue-100 dark:border-blue-900">
                         {user.isVerified ? "Verified" : "Not Verified"}
                       </span>
                     </TableCell>
-                    
+
                     {/* Date */}
                     <TableCell className="text-gray-500 dark:text-gray-400 text-sm">
                       {formatDate(user.createdAt)}
                     </TableCell>
-                    
+
                     {/* Status Badge */}
                     <TableCell>
                       <span className={cn(
@@ -185,21 +185,20 @@ export default function AllUserList() {
                         {user.isActive}
                       </span>
                     </TableCell>
-                    
+
                     {/* Actions */}
                     <TableCell className="flex items-center justify-end gap-1 mt-0.5">
-                      <Link className="cursor-pointer" to={`/admin/user/${user._id}`}>
+                      <Link className="cursor-pointer" to={`/user/${user._id}`}>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-900/20">
                           <EyeIcon className="w-4 h-4" />
                         </Button>
                       </Link>
-                      
                       <DeleteConfirmation onConfirm={() => handleRemoveUser(user._id)}>
                         <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20">
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </DeleteConfirmation>
-                      
+
                       <UserActionMenu user={user} />
                     </TableCell>
 
@@ -232,13 +231,13 @@ export default function AllUserList() {
                     key={page}
                     onClick={() => setCurrentPage(page)}
                   >
-                    <PaginationLink 
+                    <PaginationLink
                       className={cn(
                         "cursor-pointer rounded-xl transition-colors",
-                        currentPage === page 
+                        currentPage === page
                           ? "bg-[#1BAE70] text-white hover:bg-[#16965f] hover:text-white border-transparent"
                           : "hover:bg-gray-100 dark:hover:bg-zinc-800"
-                      )} 
+                      )}
                       isActive={currentPage === page}
                     >
                       {page}

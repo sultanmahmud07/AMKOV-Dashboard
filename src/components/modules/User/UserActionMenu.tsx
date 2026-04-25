@@ -28,7 +28,7 @@ export function UserActionMenu({ user }: { user: IUser }) {
                   isActive: status
             }
             try {
-                  const res = await updateUserByAdmin({userId, userInfo}).unwrap();
+                  const res = await updateUserByAdmin({ userId, userInfo }).unwrap();
                   if (res.success) {
                         toast.dismiss(toastId);
                         toast.success("User status updated successfully");
@@ -39,7 +39,7 @@ export function UserActionMenu({ user }: { user: IUser }) {
                   toast.error(`${error.data.message}`);
             }
       };
-      
+
       return (
             <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -53,6 +53,7 @@ export function UserActionMenu({ user }: { user: IUser }) {
                                     <DropdownMenuCheckboxItem
                                           key={status}
                                           checked={user?.isActive === status}
+                                          disabled={user.role === "SUPER_ADMIN"}
                                           onCheckedChange={() => handleStatusUpdate(status)}
                                     >
                                           {status}

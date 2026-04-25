@@ -47,8 +47,8 @@ const ViewProductDetails = () => {
     );
   }
 
-  // Set initial selected image if available
   const mainImage = selectedImage || (product.images && product.images[0]);
+  const cleanContent = product?.description?.replace(/&nbsp;/g, ' ') || "";
 
   return (
     <div className="w-full mx-auto p-2 md:p-4 lg:p-5">
@@ -72,7 +72,7 @@ const ViewProductDetails = () => {
       </div>
 
       {/* Split Layout Container */}
-      <div className="flex flex-col lg:flex-row gap-8 items-start">
+      <div className="w-full flex flex-col lg:flex-row gap-8 items-start">
 
         {/* ================= LEFT SIDE: IMAGE GALLERY ================= */}
         <div className="w-full lg:w-1/3 flex flex-col gap-4 sticky top-6">
@@ -96,12 +96,12 @@ const ViewProductDetails = () => {
 
           {/* Thumbnail Strip */}
           {product.images && product.images.length > 1 && (
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            <div className="grid grid-cols-3 gap-1 md:grid-cols-5 pb-2 scrollbar-hide">
               {product.images.map((imgUrl, index) => (
                 <button
                   key={index}
                   onClick={() => setSelectedImage(imgUrl)}
-                  className={`flex-shrink-0 w-20 h-20 rounded-lg border-2 overflow-hidden transition-all ${mainImage === imgUrl ? "border-primary shadow-md" : "border-transparent opacity-70 hover:opacity-100"
+                  className={`flex-shrink-0  rounded border-2 overflow-hidden transition-all ${mainImage === imgUrl ? "border-primary shadow-md" : "border-transparent opacity-70 hover:opacity-100"
                     }`}
                 >
                   <img src={imgUrl} alt={`Thumbnail ${index}`} className="w-full h-full object-cover" />
@@ -178,10 +178,9 @@ const ViewProductDetails = () => {
             </CardHeader>
             <CardContent className="pt-4">
               {product.description ? (
-                // Dangerously set HTML to render the TextEditor content safely inside this controlled container
                 <div
                   className="prose prose-sm md:prose-base prose-gray dark:prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: product.description }}
+                  dangerouslySetInnerHTML={{ __html: cleanContent }}
                 />
               ) : (
                 <span className="text-gray-400 italic">No description provided.</span>

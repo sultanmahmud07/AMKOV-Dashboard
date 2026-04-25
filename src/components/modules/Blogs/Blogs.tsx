@@ -14,6 +14,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { Input } from "@/components/ui/input";
+import NewsSkeleton from "../loader/Blog/NewsSkeleton";
 /* ================= COMPONENT ================= */
 
 const Blogs: React.FC = () => {
@@ -31,7 +32,7 @@ const Blogs: React.FC = () => {
   const totalPage = data?.meta?.totalPage || 1;
 
   if (isLoading) {
-    return <Loader />;
+    return <NewsSkeleton />;
   }
 
   return (

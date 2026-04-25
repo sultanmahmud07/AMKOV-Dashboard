@@ -15,27 +15,26 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch"; // Added Switch
 import { Textarea } from "@/components/ui/textarea"; // Added Textarea for Meta Description
 import { useGetAllCategoriesQuery } from "@/redux/features/category/category.api";
 import "react-quill-new/dist/quill.snow.css";
 import TextEditor from "./TextEditor";
-
+import { Badge } from "@/components/ui/badge";
+import { Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 // 1. Zod Schema
 const productSchema = z.object({
   name: z.string().min(1, "Product name is required"),
   slug: z.string().min(1, "Slug is required"),
   basePrice: z.coerce.number().min(0.01, "Price must be greater than 0"),
   description: z.string().optional(),
-  category: z.string().optional(),
-
-  // New Fields
+  categories: z.array(z.string()).min(1, "At least one category is required"),
+  orderBy: z.coerce.number().default(0),
   metaTitle: z.string().optional(),
   metaDescription: z.string().optional(),
   isMenu: z.boolean().default(false),
   isTrendy: z.boolean().default(false),
-
   bulletPoints: z.array(z.object({ value: z.string().min(1, "Cannot be empty") })).optional(),
   specifications: z.array(
     z.object({
@@ -81,7 +80,8 @@ const CreateProduct = () => {
       slug: "",
       basePrice: 0,
       description: "",
-      category: "",
+      categories: [], 
+      orderBy: 9999,
       metaTitle: "",
       metaDescription: "",
       isMenu: true,
@@ -115,7 +115,6 @@ const CreateProduct = () => {
       ...data,
       bulletPoints: data.bulletPoints?.map((bp) => bp.value) || [],
     };
-console.log("data:", formattedData)
     const formData = new FormData();
     // Stringify text data (including the new boolean and meta fields)
     formData.append("data", JSON.stringify(formattedData));
@@ -220,29 +219,87 @@ console.log("data:", formattedData)
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Category */}
-              <div className="space-y-2">
-                <Label>Category</Label>
+              {/* --- UPDATED: Multi-Select Category --- */}
+              <div className="space-y-3">
+                <Label>Categories (Select Multiple)</Label>
                 <Controller
                   control={control}
-                  name="category"
-                  render={({ field }) => (
-                    <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingCategories}>
-                      <SelectTrigger>
-                        <SelectValue placeholder={isLoadingCategories ? "Loading categories..." : "Select a category"} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categories.map((category: any) => (
-                          <SelectItem key={category._id} value={category._id}>
-                            {category.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-                {errors.category && <p className="text-red-500 text-sm">{errors.category.message}</p>}
-              </div>
+                  name="categories"
+                  render={({ field }) => {
+                    const selectedIds = field.value || [];
 
+                    const handleSelect = (categoryId: string) => {
+                      if (selectedIds.includes(categoryId)) {
+                        field.onChange(selectedIds.filter((id) => id !== categoryId));
+                      } else {
+                        field.onChange([...selectedIds, categoryId]);
+                      }
+                    };
+
+                    return (
+                      <div className="space-y-3">
+                        {/* Display Selected Categories as Badges */}
+                        <div className="flex flex-wrap gap-2 min-h-[32px] p-3 border rounded-md bg-gray-50/50 dark:bg-gray-800/50">
+                          {selectedIds.length === 0 ? (
+                            <span className="text-sm text-gray-400">No categories selected</span>
+                          ) : (
+                            categories
+                              .filter((c: any) => selectedIds.includes(c._id))
+                              .map((cat: any) => (
+                                <Badge
+                                  key={cat._id}
+                                  variant="secondary"
+                                  className="cursor-pointer text-white hover:bg-red-100 hover:text-red-700 pr-1.5"
+                                  onClick={() => handleSelect(cat._id)}
+                                >
+                                  {cat.name}
+                                  <X className="w-3 h-3 ml-1" />
+                                </Badge>
+                              ))
+                          )}
+                        </div>
+
+                        {/* Category Selection List */}
+                        <div className="border rounded-md divide-y max-h-[200px] overflow-y-auto">
+                          {isLoadingCategories ? (
+                            <div className="p-4 text-center text-sm text-gray-500">Loading categories...</div>
+                          ) : (
+                            categories.map((category: any) => {
+                              const isSelected = selectedIds.includes(category._id);
+                              return (
+                                <div
+                                  key={category._id}
+                                  onClick={() => handleSelect(category._id)}
+                                  className={cn(
+                                    "flex items-center justify-between p-3 text-sm cursor-pointer transition-colors hover:bg-gray-50 dark:hover:bg-gray-800",
+                                    isSelected && "bg-primary/5 dark:bg-primary/10"
+                                  )}
+                                >
+                                  <span className={isSelected ? "font-medium text-primary" : ""}>
+                                    {category.name}
+                                  </span>
+                                  {isSelected && <Check className="w-4 h-4 text-primary" />}
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+                      </div>
+                    );
+                  }}
+                />
+                {errors.categories && <p className="text-red-500 text-sm">{errors.categories.message}</p>}
+              </div>
+              <div className="space-y-2">
+                <Label>Display Order (orderBy)</Label>
+                <Input
+                  type="number"
+                  placeholder="0"
+                  {...register("orderBy")}
+                />
+                <p className="text-xs text-gray-500">Lower numbers appear first.</p>
+                {errors.orderBy && <p className="text-red-500 text-sm">{errors.orderBy.message}</p>}
+              </div>
               {/* Slug */}
               <div className="space-y-2">
                 <Label>URL Slug</Label>
