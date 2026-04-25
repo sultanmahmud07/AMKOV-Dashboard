@@ -4,7 +4,6 @@ import { Link } from "react-router";
 import BlogCard from "./BlogCard";
 import { IBlog } from "@/types/blog.type";
 import { useGetAllBlogsQuery } from "@/redux/features/blog/blog.api";
-import Loader from "@/pages/Spinner";
 import {
   Pagination,
   PaginationContent,
