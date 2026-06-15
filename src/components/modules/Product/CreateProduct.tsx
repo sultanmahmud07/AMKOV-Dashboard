@@ -142,7 +142,6 @@ const CreateProduct = () => {
     }
   };
 
-  // File Handlers
   const handleGalleryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       setGalleryFiles((prev) => [...prev, ...Array.from(e.target.files as FileList)]);
@@ -175,8 +174,6 @@ const CreateProduct = () => {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-
-        {/* Basic Information */}
         <Card>
           <CardHeader>
             <CardTitle>Basic Information</CardTitle>
@@ -219,7 +216,6 @@ const CreateProduct = () => {
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Category */}
-              {/* --- UPDATED: Multi-Select Category --- */}
               <div className="space-y-3">
                 <Label>Categories (Select Multiple)</Label>
                 <Controller
@@ -238,7 +234,6 @@ const CreateProduct = () => {
 
                     return (
                       <div className="space-y-3">
-                        {/* Display Selected Categories as Badges */}
                         <div className="flex flex-wrap gap-2 min-h-[32px] p-3 border rounded-md bg-gray-50/50 dark:bg-gray-800/50">
                           {selectedIds.length === 0 ? (
                             <span className="text-sm text-gray-400">No categories selected</span>
