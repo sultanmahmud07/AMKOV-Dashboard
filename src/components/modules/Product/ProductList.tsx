@@ -25,12 +25,10 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ProductTableSkeleton from "../loader/Product/TableSkeleton";
 
-// Import the separated Action Menu component (Adjust path if needed)
 import { ProductActionMenu } from "./ProductActionMenu";
 
-// Redux hooks and Types
 import { useGetAllProductsQuery, useRemoveProductMutation } from "@/redux/features/product/product.api";
-import { IProduct } from "@/types/product.type"; // Adjust path if needed
+import { IProduct } from "@/types/product.type"; 
 import { formatDate } from "@/utils/getDateFormater";
 
 
@@ -38,14 +36,14 @@ export default function ProductList() {
       const [currentPage, setCurrentPage] = useState(1);
       const [limit] = useState(10);
       const [searchTerm, setSearchTerm] = useState("");
-      const [sortOrder, setSortOrder] = useState("orderBy"); // Default sort order
+      const [sortOrder, setSortOrder] = useState("orderBy"); 
 
       const { data, isLoading } = useGetAllProductsQuery({ page: currentPage, limit, searchTerm, sort: sortOrder });
       const [removeProduct] = useRemoveProductMutation();
 
       const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
             setSearchTerm(e.target.value);
-            setCurrentPage(1); // Reset to first page on new search
+            setCurrentPage(1); 
       };
 
       const handleSortChange = (value: string) => {
